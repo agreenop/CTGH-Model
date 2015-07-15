@@ -35,11 +35,12 @@ i=size(Q,1);
 while i>0
     for j=1:size(Q,2)
 %This section allows for the spiral motion of the CTGH       
-        j1=mod(j+1,size(Q,2)+1);
-        i1=i;
-        if j1==0 
-            j1=1;
+        if j+1>size(Q,2)
+            j1=j+1-size(Q,2);
             i1=i-1;
+        else
+        j1=j+1;
+        i1=i;
         end
         if i1==0 %Stops loop at T_l(1,size(T_l,2))
             i=0; 

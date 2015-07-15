@@ -6,6 +6,7 @@ k=1;
 for i=1:size(T_l,1)   
     for j=1:size(T_l,2)
         if T_l(i,j)==T_l_in
+            k=k+1;
         else
             T_l(i,j)=X(k);
             k=k+1;
@@ -15,6 +16,7 @@ end
 for i=1:size(T_g,1) 
     for j=1:size(T_g,2)
         if T_g(i,j)==T_g_in
+            k=k+1;
         else
             T_g(i,j)=X(k);
             k=k+1;
@@ -30,4 +32,3 @@ for i=1:size(Q,1)
          end
     end
 end
-     

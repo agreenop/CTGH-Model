@@ -2,7 +2,7 @@
 %outputs for the liquid coolant and gas medium for the CTGH.
 function CTGH_plot(T_l,T_g,Q,P_l,P_g)
 %Plot liquid coolant temperatures
-rho=4:size(T_l,1)+3;
+rho=10:size(T_l,1)+9;
 theta = linspace(90,-270,size(T_l,2))*pi/180;
 [th, r] = meshgrid(theta, rho);
 figure(1)
@@ -11,7 +11,7 @@ view(2);
 axis equal tight;
 colorbar;
 %Plot gas temperatures
-rho_g=4:size(T_g,1)+3;
+rho_g=10:size(T_g,1)+9;
 theta_g = linspace(90,-270,size(T_g,2))*pi/180;
 [th_g, r_g] = meshgrid(theta_g, rho_g);
 figure(2)

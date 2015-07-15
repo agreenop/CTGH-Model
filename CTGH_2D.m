@@ -4,7 +4,7 @@
 %Andrew Greenop June 22, 2015
 clc;clear;
 [T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l]=inlet_cond;
-[tubes_vol,N_T,N_L,tubes,D_out,D_in,L,H,SL,ST,k_t,rho_t,Cp_t]=CTGH_geom; %Establishes geometry and material of tubes
+[tubes_vol,N_T,N_L,tubes,D_out,D_in,L,H,SL,ST,k_t,rho_t,Cp_t,entry]=CTGH_geom; %Establishes geometry and material of tubes
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume
 m_g_vol=m_g/(108); %Mass flow of gas per volume
@@ -18,42 +18,48 @@ for j=1:size(T_g,2)
     P_g(1,j)=P_g_in;
 end
 BC_g=nnz(T_g);%Number of 'cool' gas entry points into CTAH
-for j=[1,28,55,82]
+for j=1:round(size(Q,2)/entry):size(Q,2)
     T_l(size(T_l,1),j)=T_l_in; %Coolant inlet temperatures at manifold entry points
     P_l(size(T_l,1),j)=P_l_in;
 end
 BC_l=nnz(T_l); %Number of 'hot' coolant entry points into CTAH
 inlet_prop=1;
 [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol);
-T_g(2,size(Q,2))=T_g(1,size(Q,2)); %No heat exchanger at grid spacing (1,size(Q,2)).
+%T_g(2,size(Q,2))=T_g(1,size(Q,2)); %No heat exchanger at grid spacing (1,size(Q,2)).
 T_l_out_old=T_l_in;
 % while (1) %Starts process assuming constant heat transfer properties throughout system. Repeats using properties based on temperature and pressure of volume cell.
 A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q));
 B=zeros(size(A,1),1);
 count=0;
-for j_entry=[1,28,55,82]
- i=size(Q,1);   
+for j_entry=1:round(size(Q,2)/entry):size(Q,2)
+ i=size(Q,1);
+ count_move=3;
 while i>0
-    count_move=3;
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
          count_move=count_move+1;
-         j=mod(j0,size(Q,2)+1);
-         if j==0
-             j=1;
+         if j0>size(Q,2)
+            j=j0-size(Q,2);
+         else
+            j=j0;
          end
-         j1=mod(j0+1,size(Q,2)+1);
-         i1=i;
-         if count_move==27
+         if j+1>size(Q,2)
+            j1=j+1-size(Q,2);
+         else
+             j1=j+1;
+         end
+         if count_move==round(size(Q,2)/entry)
          i1=i-1;
          count_move=0;
+         else
+             i1=i;
          end
-        if j1==0 
-            j1=1;
-        end
-        if i1==0 %Stops loop at T_l(1,size(T_l,2))
+        if i==1 && j1==size(T_l,2)-3 %Stops loop at T_l(1,size(T_l,2)-3)
             i=0; 
             break %Exit for loop. i=0 fullfills while condition.
+        elseif j==j_entry-4 && i==1
+            i=0;
+            break
         end
 %This section calculates the temperature and heat transfer for each volume.        
        l1=(i-1)*size(T_l,2)+j; %Placement of T_l(i,j) coefficient
@@ -102,20 +108,20 @@ while i>0
        end
        if T_g(i,j)==T_g_in
            A(count,g1)=0;
-           B(count)=T_g(i,j)*UA/2+B(count);
+           B(count)=T_g(i,j)*UA/2;
        elseif T_g(i+1,j)==T_g_in
            A(count,g2)=0;
-           B(count)=T_g(i+1,j)*UA/2+B(count);
+           B(count)=T_g(i+1,j)*UA/2;
        end 
        if P_l(i1,j1)~=P_l_in
           P_l(i1,j1)=P_l(i,j)-((128*mu_l*L*m_l_t)/(rho_l*pi*D_in^4))*10^-5; %Pressure drop across volume of coolant assuming laminar flow. 
        end
        i=i1;
-    end
+     end
 end
 end
-A1=A(:,any(A));
-X=linsolve(A1,B); %Solves for variables
+%A1=A(:,any(A));
+X=linsolve(A,B); %Solves for variables
 [T_l,T_g,Q]=assignment(T_l,T_g,Q,X,T_l_in,T_g_in); %Resinserts variables back into their respective matrix
 %This next section calculates the pressure drop of the gas
 %through each volume element.
@@ -131,11 +137,12 @@ i1=1;
          end
      end
 if abs(T_l(1,size(T_l,2))-T_l_out_old)<0.000001
-   break 
+    break 
 end
 T_l_out_old=T_l(1,size(T_l,2));
 inlet_prop=inlet_prop+1;
 % end
+
 % disp(T_l);
 % disp(T_g);
 % disp(Q);
