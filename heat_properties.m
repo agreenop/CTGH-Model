@@ -14,7 +14,6 @@ else
 %   P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
     P_l_avg=(P_l(i1,j1)+P_l(i,j))/2;
     P_g_avg=P_g_in;
-%     P_l_avg=P_l_in;
 end
 [tubes_vol,N_T,N_L,tubes,D_out,D_in,L,H,SL,ST,k_t,rho_t,Cp_t]=CTGH_geom;
 [mu_l,Cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);

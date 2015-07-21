@@ -5,11 +5,11 @@
 clc;clear;
 [T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l]=inlet_cond;
 [tubes_vol,N_T,N_L,tubes,D_out,D_in,L,H,SL,ST,k_t,rho_t,Cp_t,entry]=CTGH_geom; %Establishes geometry and material of tubes
+m_l_2_D=m_l/(36*4);
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
-m_l_vol=m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume
-m_l_2_D=m_l_vol*entry;
-m_g_vol=m_g/(108); %Mass flow of gas per volume
+m_l_vol=m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume %m_l_t*tubes_vol;
 m_g_2_D=m_g;
+m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume
 Q=zeros(12,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
@@ -28,7 +28,7 @@ for j=1:round(size(Q,2)/entry):size(Q,2)
 end
 BC_l=nnz(T_l); %Number of 'hot' coolant entry points into CTAH
 inlet_prop=1;
-T_l_out_old=T_l_in;
+T_l_out_old=zeros(size(T_l,1),size(T_l,2));
 while (1) %Starts process assuming constant heat transfer properties throughout system. Repeats using properties based on average temperature and pressure of volume cell.
 A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q));
 B=zeros(size(A,1),1);
@@ -51,7 +51,7 @@ while i>0
          else
              j1=j+1;
          end
-         if count_move==round(size(Q,2)/entry)
+         if count_move==round(size(Q,2)/entry)||j1==size(T_l,2)-2
          i1=i-1;
          count_move=0;
          else
@@ -60,7 +60,7 @@ while i>0
          if i1==0
              i1=1;
          end
-%This section calculates the temperature and heat transfer for each volume.        
+%This section assigns the values of the coefficient matrix that will solve for the temperatures and heat transfer for each volume.        
        l1=(i-1)*size(T_l,2)+j; %Placement of T_l(i,j) coefficient
        l2=(i1-1)*size(T_l,2)+j1; %Placement of T_l(i1,j1) coefficient
        g1=numel(T_l)+(i-1)*size(T_g,2)+j; %Placement of T_g(i,j) coefficient
@@ -117,12 +117,12 @@ while i>0
           P_l(i1,j1)=P_l(i,j)-((128*mu_l*L*m_l_t)/(rho_l*pi*D_in^4))*10^-5; %Pressure drop across volume of coolant assuming laminar flow. 
        end
        if i==1 && j1==size(T_l,2)-2 %Stops loop at T_l(1,size(T_l,2)-2)
-           T_l_out(entry_number,1)=T_l(i,j1);
+           T_l_out(entry_number,1)=j1;
            entry_number=entry_number+1;
            i=0;
             break %Exit for loop. i=0 fullfills while condition.
        elseif j1==j_entry-3 && i==1
-           T_l_out(entry_number,1)=T_l(i,j1);
+           T_l_out(entry_number,1)=j1;
            entry_number=entry_number+1;
            i=0;
            break
@@ -139,17 +139,17 @@ i1=1;
      for i=1:size(P_g,1)-1 
          for j=1:size(P_g,2)
           if P_g(i+1,j)~=P_g_in   
-            [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
+            [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
             chi=1.15;
             f=0.2;
          P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
           end
          end
      end
-if abs(T_l(1,size(T_l,2)-2)-T_l_out_old)<0.0001
+if mean(mean(abs(T_l-T_l_out_old)<.001))==1
     break 
 end
-T_l_out_old=T_l(1,size(T_l,2)-2);
+T_l_out_old=T_l;
 inlet_prop=inlet_prop+1;
 end
 Q_actual=sum(sum(Q));
@@ -171,15 +171,17 @@ for i=1:size(T_g,1)
     end
 end
 %This next section will calculate the effectiveness of the heat exchanger.
+for entry_number=1:size(T_l_out,1)
+    T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1));
+end
 T_g_avg_out=mean(T_g(size(T_g,1),:));
 T_g_avg_total=(T_g_avg_out+T_g_in)/2;
 T_l_avg_out=mean(T_l_out);
 T_l_avg_total=(T_l_avg_out+T_l_in)/2;
 inlet_prop=1;
 [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g);
-C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);%Fix mass flow rates
-Q_ideal=C_min*(T_l_in-T_g_in);
-%Q_actual=m_g_2_D*Cp_g*(T_g_avg_out-T_g_in);
-epsilon=Q_actual/Q_ideal;
+C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
+Q_max=C_min*(T_l_in-T_g_in);
+epsilon=Q_actual/Q_max;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
 CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix)
