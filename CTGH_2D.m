@@ -3,14 +3,17 @@
 %see Solidworks model.
 %Andrew Greenop June 22, 2015
 clc;clear;
-[T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l]=inlet_cond;
-[tubes_vol,N_T,N_L,tubes,D_out,D_in,L,H,SL,ST,k_t,rho_t,Cp_t,entry]=CTGH_geom; %Establishes geometry and material of tubes
+[gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry,program]=CTGH_2D_GUI;
+if isequal(program,'Cancel')
+    return
+end
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t); %Establishes geometry and material of tubes
 m_l_2_D=m_l/(36*4);
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
-m_l_vol=m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume %m_l_t*tubes_vol;
-m_g_2_D=m_g;
-m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume
-Q=zeros(12,108); %Establish grid size of system
+m_l_vol=m_l_2_D/(entry);%m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume %m_l_t*tubes_vol;
+m_g_2_D=m_g;%/(36*4);
+m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 0.333722;
+Q=zeros(3*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -68,7 +71,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1==0=m_l_vol*Cp_l*(T_l(i,j+1)-T_l(i,j))-Q(i,j);
        count=count+1;
-       [UA,Cp_l,Cp_g,mu_l,rho_l]=heat_properties(inlet_prop,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
+       [UA,Cp_l,Cp_g,mu_l,rho_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
        UA_matrix(i,j)=UA;
        A(count,l2)=-m_l_vol*Cp_l;
        A(count,l1)=m_l_vol*Cp_l;
@@ -131,7 +134,9 @@ while i>0
      end
 end
 end
-X=linsolve(A,B); %Solves for variables
+A_sparse=sparse(A);
+B_sparse=sparse(B);
+X=mldivide(A,B); %Solves for variables
 [T_l,T_g,Q]=assignment(T_l,T_g,Q,X,T_l_in,T_g_in); %Resinserts variables back into their respective matrix
 %This next section calculates the pressure drop of the gas
 %through each volume element.
@@ -139,7 +144,7 @@ i1=1;
      for i=1:size(P_g,1)-1 
          for j=1:size(P_g,2)
           if P_g(i+1,j)~=P_g_in   
-            [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
+            [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
             chi=1.15;
             f=0.2;
          P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
@@ -179,7 +184,7 @@ T_g_avg_total=(T_g_avg_out+T_g_in)/2;
 T_l_avg_out=mean(T_l_out);
 T_l_avg_total=(T_l_avg_out+T_l_in)/2;
 inlet_prop=1;
-[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g);
+[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g);
 C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
 Q_max=C_min*(T_l_in-T_g_in);
 epsilon=Q_actual/Q_max;
