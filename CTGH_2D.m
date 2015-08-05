@@ -11,8 +11,8 @@ end
 m_l_2_D=m_l/(36*4);
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%m_l_t*tubes_vol; %Mass flow of liquid through all tubes per volume %m_l_t*tubes_vol;
-m_g_2_D=m_g;%/(36*4);
-m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 0.333722;
+m_g_2_D=m_g/(36*4);
+m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
 Q=zeros(3*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
@@ -39,7 +39,7 @@ count=0;
 entry_number=1;
 for j_entry=1:round(size(Q,2)/entry):size(Q,2)
  i=size(Q,1);
- count_move=3;
+ count_move=2;
 while i>0
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
@@ -54,14 +54,14 @@ while i>0
          else
              j1=j+1;
          end
-         if count_move==round(size(Q,2)/entry)||j1==size(T_l,2)-2
+         if count_move==round(size(Q,2)/entry)||j==size(T_l,2)-2
          i1=i-1;
          count_move=0;
          else
              i1=i;
          end
          if i1==0
-             i1=1;
+            i1=1;
          end
 %This section assigns the values of the coefficient matrix that will solve for the temperatures and heat transfer for each volume.        
        l1=(i-1)*size(T_l,2)+j; %Placement of T_l(i,j) coefficient
@@ -120,11 +120,25 @@ while i>0
           P_l(i1,j1)=P_l(i,j)-((128*mu_l*L*m_l_t)/(rho_l*pi*D_in^4))*10^-5; %Pressure drop across volume of coolant assuming laminar flow. 
        end
        if i==1 && j1==size(T_l,2)-2 %Stops loop at T_l(1,size(T_l,2)-2)
+           count=count+1;
+           g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of T_g(i1,j1) coefficient
+           g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of T_g(i1+1,j1) coefficient
+           q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of Q(i1,j1) coefficient
+           B(count)=m_g_vol*Cp_g*T_g(i1,j1);
+           A(count,g2)=m_g_vol*Cp_g;
+           A(count,q1)=-1;
            T_l_out(entry_number,1)=j1;
            entry_number=entry_number+1;
            i=0;
-            break %Exit for loop. i=0 fullfills while condition.
+           break %Exit for loop. i=0 fullfills while condition.
        elseif j1==j_entry-3 && i==1
+           count=count+1;
+           g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of T_g(i1,j1) coefficient
+           g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of T_g(i1+1,j1) coefficient
+           q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of Q(i1,j1) coefficient
+           B(count)=m_g_vol*Cp_g*T_g(i1,j1);
+           A(count,g2)=m_g_vol*Cp_g;
+           A(count,q1)=-1;
            T_l_out(entry_number,1)=j1;
            entry_number=entry_number+1;
            i=0;
@@ -160,6 +174,7 @@ end
 Q_actual=sum(sum(Q));
 Q(Q==0)=NaN;
 T_l(T_l==0)=NaN;
+UA_matrix(UA_matrix==0)=NaN;
 for i=1:size(T_l,1)
     for j=1:size(T_l,2)
         if isnan(T_l(i,j))==1

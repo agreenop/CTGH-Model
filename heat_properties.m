@@ -11,9 +11,9 @@ if inlet_prop==1
 else
     T_l_avg=(T_l(i1,j1)+T_l(i,j))/2;
     T_g_avg=(T_g(i,j)+T_g(i+1,j))/2;
-%   P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
+    P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
     P_l_avg=(P_l(i1,j1)+P_l(i,j))/2;
-    P_g_avg=P_g_in;
+%     P_g_avg=P_g_in;
 end
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t);
 switch liquid
