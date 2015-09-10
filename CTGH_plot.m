@@ -37,7 +37,7 @@ surf(r_g.*cos(th_g),r_g.*sin(th_g),P_g,'linestyle', 'none');
 view(2);
 axis equal tight;
 colorbar;
-%Plot UA of each cell
+%Plot UA of each volume cell
 figure(6)
 surf(r.*cos(th),r.*sin(th),UA_matrix,'linestyle', 'none'); 
 view(2);

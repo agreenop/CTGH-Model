@@ -2,8 +2,8 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1)
-if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1)
+if inlet_prop<=2 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
     P_g_avg=P_g_in;
@@ -14,7 +14,7 @@ else %Every other time, properties will be calculated at average temperatures an
     P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
     P_l_avg=(P_l(i1,j1)+P_l(i,j))/2;
 end
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t);
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,i);
 switch liquid %Liquid properties depending on type of liquid
     case 'Fluoride Salt'
         [mu_l,Cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);
