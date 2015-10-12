@@ -6,8 +6,8 @@ N_T=5; %Number of rows in transversal direction per volume cell
 N_L=5; %Number of rows in longitudinal direction per volume cell
 tubes=13680; %Total number of tubes in CTGH
 D_in=D_out-2*t; %Inside diameter [m]
-L=1.585*0.0254; %Length of control volume in direction of coolant flow [m]
-H=1.26*0.0254; %Height of control volume [m]
+L=0.5*0.0254; %Length of control volume in direction of coolant flow [m]
+H=4*0.0254; %Height of control volume [m]
 switch tube_material
     case '316 Stainless Steel'
         k_t=13.40; %316 SS thermal conductivity [W/m*K]

@@ -8,10 +8,10 @@ if isequal(program,'Cancel')
     return
 end
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t); %Establishes geometry and material of tubes
-m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
+m_l_2_D=m_l;%/(36*4); %36 layers of the CTGH split into 4 each
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(36*4);
+m_g_2_D=m_g;%/(36*4);
 m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
 Q=zeros(3*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
