@@ -8,7 +8,7 @@ if isequal(program,'Cancel')
     return
 end
 i=1;
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,i); %Establishes geometry and material of tubes
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
 m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
@@ -20,8 +20,12 @@ T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
 P_l=zeros(size(T_l));
 UA_matrix=zeros(size(Q));
+U_matrix=zeros(size(Q));
+A_matrix=zeros(size(Q));
 Velocity_matrix=zeros(size(Q));
 Re_g_matrix=zeros(size(Q));
+h_g_matrix=zeros(size(Q));
+Re_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
@@ -77,10 +81,13 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
+       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1);
        UA_matrix(i,j)=UA; %Records UA values for this volume
+       U_matrix(i,j)=UA/Area; %Records U values for this volume
+       A_matrix(i,j)=Area; %Records surface area for each volume
        Velocity_matrix(i,j)=u_max_app;
        Re_g_matrix(i,j)=Re_g;
+       h_g_matrix(i,j)=h_g;
        A(count,l2)=-m_l_vol*Cp_l;
        A(count,l1)=m_l_vol*Cp_l;
        A(count,q1)=-1;
@@ -140,6 +147,7 @@ while i>0
        %using friction head loss formula.
        if P_l(i1,j1)~=P_l_in
           P_l(i1,j1)=P_l(i,j)-((128*mu_l*L*m_l_t)/(rho_l*pi*D_in^4))*10^-5; %Pressure drop across volume of coolant assuming laminar flow. 
+          Re_l_matrix(i,j)=4*m_l_t/(pi*D_in*mu_l);
        end
        if i==1 && j1==size(T_l,2)-2 %Stops loop at T_l(1,size(T_l,2)-2), a liquid exit point. Only applies to loop with entry point at j=1.
            count=count+1;
@@ -271,7 +279,10 @@ Q_avg=mean(mean(Q(Q~=0)));
 UA_avg=mean(mean(UA_matrix(UA_matrix~=0)));
 Q(Q==0)=NaN; %Places "NaN" in blank spots in Q matrix
 T_l(T_l==0)=NaN; %Places "NaN" in blank spots in T_l matrix
-UA_matrix(UA_matrix==0)=NaN; 
+UA_matrix(UA_matrix==0)=NaN;
+Re_g_matrix(Re_g_matrix==0)=NaN;
+Re_l_matrix(Re_l_matrix==0)=NaN;
+h_g_matrix(h_g_matrix==0)=NaN;
 for i=1:size(T_l,1)
     for j=1:size(T_l,2)
         if isnan(T_l(i,j))==1
@@ -292,13 +303,18 @@ for entry_number=1:size(T_l_out,1)
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
 end
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
-T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
+% T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
 T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
-T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
-inlet_prop=1;
-[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i);
-C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
-Q_max=C_min*(T_l_in-T_g_in);
-epsilon=Q_actual/Q_max;
+% T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
+U_avg=sum(sum(U_matrix))/nnz(U_matrix);
+A_total=sum(sum(A_matrix));
+UA_total=U_avg*A_total;
+LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_avg_out-T_g_in));
+Q_m=UA_total*LMTD;
+% inlet_prop=1;
+% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i);
+% C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
+% Q_max=C_min*(T_l_in-T_g_in);
+epsilon=Q_actual/Q_m;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
-CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix) %Plots the values
+CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,gas,liquid) %Plots the values
