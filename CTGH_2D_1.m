@@ -110,26 +110,35 @@ while i>0
         end
        %EQ3: 0=UA*((T_l(i,j+1)+T_l(i,j))/2-(T_g(i+1,j)+T_g(i,j))/2)-Q(i,j);
        count=count+1; %Tracks number of equations
-       A(count,l2)=UA/2;
-       A(count,l1)=UA/2;
-       A(count,g2)=-UA/2;
-       A(count,g1)=-UA/2;
+       Cr=(min(m_g_vol*Cp_g,m_l_vol*Cp_l)/max(m_g_vol*Cp_g,m_l_vol*Cp_l));
+       NTU=UA/min(m_g_vol*Cp_g,m_l_vol*Cp_l);
+       eff=1-exp(-Cr^-1*(1-exp(-Cr*NTU)))
+       A(count,l1)=eff*min(m_g_vol*Cp_g,m_l_vol*Cp_l);
+       A(count,g1)=-eff*min(m_g_vol*Cp_g,m_l_vol*Cp_l);
        A(count,q1)=-1;
+%        A(count,l2)=UA/2;
+%        A(count,l1)=UA/2;
+%        A(count,g2)=-UA/2;
+%        A(count,g1)=-UA/2;
+%        A(count,q1)=-1;
        %If one of the temperatures is a known value, this section moves it
        %to the solution matrix, B.
-       if T_l(i1,j1)==T_l_in
-           A(count,l2)=0;
-           B(count)=-T_l(i1,j1)*UA/2;
-       elseif T_l(i,j)==T_l_in
+%        if T_l(i1,j1)==T_l_in
+%            A(count,l2)=0;
+%            B(count)=-T_l(i1,j1)*UA/2;
+%        elseif T_l(i,j)==T_l_in
+       if T_l(i,j)==T_l_in
            A(count,l1)=0;
-           B(count)=-T_l(i,j)*UA/2;
+%            B(count)=-T_l(i,j)*UA/2;
+           B(count)=-T_l(i,j)*eff*min(m_g_vol*Cp_g,m_l_vol*Cp_l);
        end
        if T_g(i,j)==T_g_in
            A(count,g1)=0;
-           B(count)=T_g(i,j)*UA/2;
-       elseif T_g(i+1,j)==T_g_in
-           A(count,g2)=0;
-           B(count)=T_g(i+1,j)*UA/2;
+%            B(count)=T_g(i,j)*UA/2;
+           B(count)=T_g(i,j)*eff*min(m_g_vol*Cp_g,m_l_vol*Cp_l);
+%        elseif T_g(i+1,j)==T_g_in
+%            A(count,g2)=0;
+%            B(count)=T_g(i+1,j)*UA/2;
        end 
        %This section calculates the pressure of the liquid in each volume
        %using friction head loss formula.

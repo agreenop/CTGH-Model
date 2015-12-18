@@ -356,21 +356,21 @@ function Default_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.Gas_Type,'Value',1);
-set(handles.Liquid_Type,'Value',1);
+set(handles.Liquid_Type,'Value',2);
 set(handles.Tube_Material,'Value',1);
 set(handles.Diameter_Units,'Value',1);
 set(handles.Thickness_Units,'Value',1);
-set(handles.Inlet_Gas_Temp,'String',418.6);
-set(handles.Inlet_Gas_Press,'String',18.76);
-set(handles.Gas_Mass_Flow,'String',418.5);
-set(handles.Inlet_Liquid_Temp,'String',700);
+set(handles.Inlet_Gas_Temp,'String',23.7);
+set(handles.Inlet_Gas_Press,'String',1);
+set(handles.Gas_Mass_Flow,'String',.34);
+set(handles.Inlet_Liquid_Temp,'String',49.7);
 set(handles.Inlet_Liquid_Press,'String',2);
-set(handles.Liquid_Mass_Flow,'String',480.2);
+set(handles.Liquid_Mass_Flow,'String',0.2);
 set(handles.Tube_Diameter,'String',0.25);
 set(handles.Tube_Thickness,'String',0.035);
-set(handles.Long_Pitch_Ratio,'String',1.45);
-set(handles.Transverse_Pitch_Ratio,'String',1.256);
-set(handles.Liquid_Inlets,'String',4);
+set(handles.Long_Pitch_Ratio,'String',1.37);
+set(handles.Transverse_Pitch_Ratio,'String',1.67);
+set(handles.Liquid_Inlets,'String',2);
 
 % --- Executes on button press in Cancel.
 function Cancel_Callback(hObject, eventdata, handles)

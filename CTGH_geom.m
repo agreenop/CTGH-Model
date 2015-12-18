@@ -4,9 +4,9 @@ function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_materi
 tubes_vol=23; %Number of tubes in finite volume
 N_T=5; %Number of rows in transversal direction per volume cell
 N_L=5; %Number of rows in longitudinal direction per volume cell
-tubes=13680; %Total number of tubes in CTGH
+tubes=40; %Total number of tubes in CTGH
 D_in=D_out-2*t; %Inside diameter [m]
-L=0.5*0.0254; %Length of control volume in direction of coolant flow [m]
+L=0.676*0.0254; %Length of control volume in direction of coolant flow [m]
 H=4*0.0254; %Height of control volume [m]
 switch tube_material
     case '316 Stainless Steel'

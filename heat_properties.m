@@ -2,7 +2,7 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1)
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1)
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
@@ -27,7 +27,7 @@ switch gas %Gas properties depending on type of gas
 end
 %This next part finds UA.
 Nu_l=3.66; %Nusselt number for fully developed laminar flow in a pipe
-h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient 
+h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes
 R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes
 %Air flow across cross flow tubes.  See Khan paper.
@@ -42,3 +42,4 @@ Nu_g=C1*Nu_df_g; %Nusselt number for gas
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient 
 R_g=1/(tubes_vol*pi*D_out*L*h_g); %Gas thermal resistance
 UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
+Area=tubes_vol*pi*D_out*L; %Outer surface area of tubes in volume
