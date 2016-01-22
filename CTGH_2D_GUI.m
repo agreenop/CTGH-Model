@@ -22,7 +22,7 @@ function varargout = CTGH_2D_GUI(varargin)
 
 % Edit the above text to modify the response to help CTGH_2D_GUI
 
-% Last Modified by GUIDE v2.5 24-Jul-2015 14:52:35
+% Last Modified by GUIDE v2.5 18-Jan-2016 14:45:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,7 +83,8 @@ varargout{11} = handles.Tube_Thickness;
 varargout{12} = handles.Long_Pitch_Ratio;
 varargout{13} = handles.Transverse_Pitch_Ratio;
 varargout{14} = handles.Liquid_Inlets;
-varargout{15} = handles.Cancel_program;
+varargout{15} = handles.Model_Selection;
+varargout{16} = handles.Cancel_program;
  delete(hObject);
 
 
@@ -155,6 +156,10 @@ ST=str2num(get(handles.Transverse_Pitch_Ratio,'String'));
 handles.Transverse_Pitch_Ratio=ST;
 entry=str2num(get(handles.Liquid_Inlets,'String'));
 handles.Liquid_Inlets=entry;
+model_index=get(handles.Model_Selection,'Value');
+model_list=get(handles.Model_Selection,'String');
+Model_Selection=char(model_list(model_index));
+handles.Model_Selection=Model_Selection;
 handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
@@ -355,6 +360,11 @@ function Default_Callback(hObject, eventdata, handles)
 % hObject    handle to Default (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+model_index=get(handles.Model_Selection,'Value');
+model_list=get(handles.Model_Selection,'String');
+Model_Selection=char(model_list(model_index));
+switch Model_Selection
+    case 'Mk1 CTGH'
 set(handles.Gas_Type,'Value',1);
 set(handles.Liquid_Type,'Value',1);
 set(handles.Tube_Material,'Value',1);
@@ -371,6 +381,24 @@ set(handles.Tube_Thickness,'String',0.035);
 set(handles.Long_Pitch_Ratio,'String',1.45);
 set(handles.Transverse_Pitch_Ratio,'String',1.256);
 set(handles.Liquid_Inlets,'String',4);
+    case 'Test Bundle 1'
+set(handles.Gas_Type,'Value',1);
+set(handles.Liquid_Type,'Value',2);
+set(handles.Tube_Material,'Value',1);
+set(handles.Diameter_Units,'Value',1);
+set(handles.Thickness_Units,'Value',1);
+set(handles.Inlet_Gas_Temp,'String',23.7);
+set(handles.Inlet_Gas_Press,'String',1);
+set(handles.Gas_Mass_Flow,'String',.34);
+set(handles.Inlet_Liquid_Temp,'String',49.7);
+set(handles.Inlet_Liquid_Press,'String',2);
+set(handles.Liquid_Mass_Flow,'String',0.2);
+set(handles.Tube_Diameter,'String',0.25);
+set(handles.Tube_Thickness,'String',0.035);
+set(handles.Long_Pitch_Ratio,'String',1.37);
+set(handles.Transverse_Pitch_Ratio,'String',1.67);
+set(handles.Liquid_Inlets,'String',2);
+end
 
 % --- Executes on button press in Cancel.
 function Cancel_Callback(hObject, eventdata, handles)
@@ -633,3 +661,65 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in Model_Selection.
+function Model_Selection_Callback(hObject, eventdata, handles)
+% hObject    handle to Model_Selection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+model_index=get(handles.Model_Selection,'Value');
+model_list=get(handles.Model_Selection,'String');
+Model_Selection=char(model_list(model_index));
+switch Model_Selection
+    case 'Mk1 CTGH'
+set(handles.Gas_Type,'Value',1);
+set(handles.Liquid_Type,'Value',1);
+set(handles.Tube_Material,'Value',1);
+set(handles.Diameter_Units,'Value',1);
+set(handles.Thickness_Units,'Value',1);
+set(handles.Inlet_Gas_Temp,'String',418.6);
+set(handles.Inlet_Gas_Press,'String',18.76);
+set(handles.Gas_Mass_Flow,'String',418.5);
+set(handles.Inlet_Liquid_Temp,'String',700);
+set(handles.Inlet_Liquid_Press,'String',2);
+set(handles.Liquid_Mass_Flow,'String',480.2);
+set(handles.Tube_Diameter,'String',0.25);
+set(handles.Tube_Thickness,'String',0.035);
+set(handles.Long_Pitch_Ratio,'String',1.45);
+set(handles.Transverse_Pitch_Ratio,'String',1.256);
+set(handles.Liquid_Inlets,'String',4);
+    case 'Test Bundle 1'
+set(handles.Gas_Type,'Value',1);
+set(handles.Liquid_Type,'Value',2);
+set(handles.Tube_Material,'Value',1);
+set(handles.Diameter_Units,'Value',1);
+set(handles.Thickness_Units,'Value',1);
+set(handles.Inlet_Gas_Temp,'String',23.7);
+set(handles.Inlet_Gas_Press,'String',1);
+set(handles.Gas_Mass_Flow,'String',.34);
+set(handles.Inlet_Liquid_Temp,'String',49.7);
+set(handles.Inlet_Liquid_Press,'String',2);
+set(handles.Liquid_Mass_Flow,'String',0.2);
+set(handles.Tube_Diameter,'String',0.25);
+set(handles.Tube_Thickness,'String',0.035);
+set(handles.Long_Pitch_Ratio,'String',1.37);
+set(handles.Transverse_Pitch_Ratio,'String',1.67);
+set(handles.Liquid_Inlets,'String',2);
+end
+
+% Hints: contents = cellstr(get(hObject,'String')) returns Model_Selection contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from Model_Selection
+
+
+% --- Executes during object creation, after setting all properties.
+function Model_Selection_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Model_Selection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

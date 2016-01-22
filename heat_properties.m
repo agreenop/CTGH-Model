@@ -2,8 +2,8 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1)
-if inlet_prop<=2 %First time, properties will be calculated at inlet temperatures and pressures
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t)
+if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
     P_g_avg=P_g_in;
@@ -26,7 +26,23 @@ switch gas %Gas properties depending on type of gas
         [rho_g,Cp_g,mu_g,k_g,Pr_g] = Air_prop(T_g_avg,P_g_avg);
 end
 %This next part finds UA.
-Nu_l=3.66; %Nusselt number for fully developed laminar flow in a pipe
+Re_l=4*m_l_t/(pi*D_in*mu_l);
+if Re_l<=2300 %Laminar flow
+   f_l=64/Re_l; %Friction Factor for laminar flow in pipe
+   Nu_l=3.66; %Nusselt number for fully developed laminar flow in a pipe
+elseif Re_l>2300 && Re_l<3000
+    f_l=64/Re_l; 
+    Nu_l=interp1([2300,3000],[3.66,((f_l/8)*(3000-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1))],Re_l);
+elseif Re_l>=3000 && Re_l<10000 %Transition Zone Flow 
+   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for transition zone flow for smooth pipe
+   Nu_l=((f_l/8)*(Re_l-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1));
+elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
+   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth pipe
+   Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8;
+elseif Re_l>=10000 %Turbulent flow for other liquids
+   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth pipe
+   Nu_l=((f_l/8)*(Re_l-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1));
+end    
 h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient 
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes
 R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes

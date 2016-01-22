@@ -1,24 +1,19 @@
 %This program will create a 2-D model (radial and azimuthal) of the CTGH
-%assuming the gas is only flowing in the radial direction.  For grid layout,
-%see Solidworks model.
-%Andrew Greenop June 22, 2015
-clc;clear;
-[gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry,model_selection,program]=CTGH_2D_GUI; %Allows for user input with default values from 0-D model
-if isequal(program,'Cancel')
-    return
-end
-if isequal(model_selection,'Test Bundle 1')
-    [T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,T_l_out]=Mockup1_2D(gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry);
-    return
-end
-i=1;
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
-m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
+%mock-up test bundle created as an undergrad project.  This program was
+%tailored specifically for that model.
+% clc;clear;
+% [gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry,program]=CTGH_2D_GUI; %Allows for user input with default values from 0-D model
+% if isequal(program,'Cancel')
+%     return
+% end
+function [T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,T_l_out]=Mockup1_2D(gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry)
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=Mockup1_geom(tube_material,D_out,t); %Establishes geometry and material of tubes
+m_l_2_D=m_l; %The test-bundle is calculated in 1 layer
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(36*4);
+m_g_2_D=m_g; %The test-bundle is calculated in 1 layer
 m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
-Q=zeros(3*entry+2,108); %Establish grid size of system
+Q=zeros(3*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -26,9 +21,8 @@ P_l=zeros(size(T_l));
 UA_matrix=zeros(size(Q));
 U_matrix=zeros(size(Q));
 A_matrix=zeros(size(Q));
-Velocity_matrix=zeros(size(Q));
-Re_g_matrix=zeros(size(Q));
 h_g_matrix=zeros(size(Q));
+Re_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 for j=1:size(T_g,2)
@@ -68,9 +62,6 @@ while i>0
          if count_move==round(size(Q,2)/entry)||j==size(T_l,2)-2 
          i1=i-1; %Moves down a row when in line with an entry point
          count_move=0; %Resets spacing from entry point
-            if i==size(Q,1)-3 || i==size(Q,1)-8
-                i1=i-2;
-            end
          else
              i1=i;
          end
@@ -83,13 +74,12 @@ while i>0
        g1=numel(T_l)+(i-1)*size(T_g,2)+j; %Placement of T_g(i,j) coefficient
        g2=numel(T_l)+(i)*size(T_g,2)+j; %Placement of T_g(i+1,j) coefficient
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
-       %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
+       %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j+1)-T_l(i,j))-Q(i,j);
        count=count+1; %Tracks number of equations
        [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
-       Velocity_matrix(i,j)=u_max_app;
        Re_g_matrix(i,j)=Re_g;
        h_g_matrix(i,j)=h_g;
        Re_l_matrix(i,j)=Re_l;
@@ -105,7 +95,7 @@ while i>0
            A(count,l1)=0;
            B(count)=-T_l(i,j)*m_l_vol*Cp_l;
        end
-       %EQ2: 0=m_g_vol*Cp_g*(T_g(i+1,j)-T_g(i,j))-Q(i,j);
+       %EQ2: 0=m_g_vol*Cp_g*(T_g(i,j)-T_g(i+1,j))-Q(i,j);
        count=count+1; %Tracks number of equations
        A(count,g1)=-m_g_vol*Cp_g; 
        A(count,g2)=m_g_vol*Cp_g;
@@ -142,16 +132,10 @@ while i>0
            A(count,g2)=0;
            B(count)=T_g(i+1,j)*UA/2;
        end 
-       if i==size(T_g,1)-5||i==size(T_g,1)-10
-          if inlet_prop>1
-            A(count,g1)=0;
-            B(count)=T_mix*UA/2;
-          end
-       end
        %This section calculates the pressure of the liquid in each volume
        %using friction head loss formula.
        if P_l(i1,j1)~=P_l_in
-          P_l(i1,j1)=P_l(i,j)-f_l*(L/D_in^5)*(8*m_l_t^2/(pi^2*rho_l))*10^-5; %Pressure drop across volume of coolant. 
+          P_l(i1,j1)=P_l(i,j)-f_l*(L/D_in^5)*(8*m_l_t^2/(pi^2*rho_l))*10^-5; %Pressure drop across volume of coolant in bar. 
        end
        if i==1 && j1==size(T_l,2)-2 %Stops loop at T_l(1,size(T_l,2)-2), a liquid exit point. Only applies to loop with entry point at j=1.
            count=count+1;
@@ -182,71 +166,6 @@ while i>0
      end
 end
 end
-for i=[size(T_g,1)-5,size(T_g,1)-10]
-    for j=1:size(T_g,2)
-            g1=numel(T_l)+(i-1)*size(T_g,2)+j; %Placement of T_g(i,j) coefficient
-            g2=numel(T_l)+(i)*size(T_g,2)+j; %Placement of T_g(i+1,j) coefficient
-            count=count+1;
-        if inlet_prop==1
-            A(count,g1)=1;
-            A(count,g2)=-1;
-        elseif inlet_prop>1
-                if j>=5 && j<=13
-                    T_mix=mean(T_g(i,5:13));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=14 && j<=22
-                    T_mix=mean(T_g(i,14:22));                    
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=23 && j<=31
-                    T_mix=mean(T_g(i,23:31));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=32 && j<=40
-                    T_mix=mean(T_g(i,32:40));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=41 && j<=49
-                    T_mix=mean(T_g(i,41:49));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=50 && j<=58
-                    T_mix=mean(T_g(i,50:58));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=59 && j<=67
-                    T_mix=mean(T_g(i,59:67));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=68 && j<=76
-                    T_mix=mean(T_g(i,68:76));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=77 && j<=85
-                    T_mix=mean(T_g(i,77:85));
-                    A(count,g2)=1;
-                    B(count)=T_mix; 
-                elseif j>=86 && j<=94
-                    T_mix=mean(T_g(i,86:94));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=95 && j<=103
-                    T_mix=mean(T_g(i,77:85));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=1 && j<=4 
-                    T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=104 && j<=108
-                    T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                end
-         end
-    end
-end
 A_sparse=sparse(A);
 B_sparse=sparse(B);
 X=mldivide(A,B); %Solves for variables (AX=B)
@@ -256,37 +175,31 @@ X=mldivide(A,B); %Solves for variables (AX=B)
 i1=1;
      for i=1:size(P_g,1)-1 
          for j=1:size(P_g,2)
-          if P_g(i+1,j)~=P_g_in
-              if i==size(T_g,1)-5||i==size(T_g,1)-10
-                  P_g(i+1,j)=P_g(i,j);
-              else
-                %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t);
-                chi=1.15;
-                f=0.2;
-                P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
-              end
+          if P_g(i+1,j)~=P_g_in  
+              %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
+            [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t);
+            chi=1.15;
+            f=0.2;
+            P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5; 
           end
          end
      end
 %This condition is met when all of the new temperatures of the liquid based 
 %on the new temperature-dependent properties are within 0.001 of all of the 
 %corresponding old temperatures based on the old temperature-dependent properties. 
-if mean(mean(abs((T_l-T_l_out_old)./T_l)<.01))==1||inlet_prop==5
+if mean(mean(abs(T_l-T_l_out_old)<.001))==1||inlet_prop==10
     break 
 end
 T_l_out_old=T_l; %Current matrix of liquid temperature is now old matrix of liquid temperatures
 inlet_prop=inlet_prop+1; 
 end
 Q_actual=sum(sum(Q)); %Sum up heat transfer in all volumes to get total heat transfer
-Q_avg=mean(mean(Q(Q~=0)));
-UA_avg=mean(mean(UA_matrix(UA_matrix~=0)));
 Q(Q==0)=NaN; %Places "NaN" in blank spots in Q matrix
 T_l(T_l==0)=NaN; %Places "NaN" in blank spots in T_l matrix
-UA_matrix(UA_matrix==0)=NaN;
+UA_matrix(UA_matrix==0)=NaN; 
 Re_g_matrix(Re_g_matrix==0)=NaN;
-Re_l_matrix(Re_l_matrix==0)=NaN;
 h_g_matrix(h_g_matrix==0)=NaN;
+Re_l_matrix(Re_l_matrix==0)=NaN;
 for i=1:size(T_l,1)
     for j=1:size(T_l,2)
         if isnan(T_l(i,j))==1
@@ -308,7 +221,7 @@ for entry_number=1:size(T_l_out,1)
 end
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
 % T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
-T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
+T_l_avg_out=mean(T_l_out); %Average liquid outlet temperature
 % T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
 U_avg=sum(sum(U_matrix))/nnz(U_matrix);
 A_total=sum(sum(A_matrix));
@@ -316,9 +229,10 @@ UA_total=U_avg*A_total;
 LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_avg_out-T_g_in));
 Q_m=UA_total*LMTD;
 % inlet_prop=1;
-% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i);
+% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g);
 % C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
 % Q_max=C_min*(T_l_in-T_g_in);
 epsilon=Q_actual/Q_m;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
-CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,gas,liquid) %Plots the values
+Mockup1_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,gas,liquid) %Plots the values
+y=1;
