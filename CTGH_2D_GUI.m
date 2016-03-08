@@ -69,22 +69,7 @@ function varargout = CTGH_2D_GUI_OutputFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % Get default command line output from handles structure
-varargout{1} = handles.Gas_Type;
-varargout{2} = handles.Liquid_Type;
-varargout{3} = handles.Inlet_Gas_Temp;
-varargout{4} = handles.Inlet_Liquid_Temp;
-varargout{5} = handles.Inlet_Gas_Press;
-varargout{6} = handles.Inlet_Liquid_Press;
-varargout{7} = handles.Gas_Mass_Flow;
-varargout{8} = handles.Liquid_Mass_Flow;
-varargout{9} = handles.Tube_Material;
-varargout{10} = handles.Tube_Diameter;
-varargout{11} = handles.Tube_Thickness;
-varargout{12} = handles.Long_Pitch_Ratio;
-varargout{13} = handles.Transverse_Pitch_Ratio;
-varargout{14} = handles.Liquid_Inlets;
-varargout{15} = handles.Model_Selection;
-varargout{16} = handles.Cancel_program;
+varargout{1} = handles.Cancel_program;
  delete(hObject);
 
 
@@ -95,28 +80,19 @@ function Run_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 gas_index=get(handles.Gas_Type,'Value');
 gas_list=get(handles.Gas_Type,'String');
-Gas_Type=char(gas_list(gas_index));
-handles.Gas_Type=Gas_Type;
+gas=char(gas_list(gas_index));
 liqud_index=get(handles.Liquid_Type,'Value');
 liquid_list=get(handles.Liquid_Type,'String');
 liquid=char(liquid_list(liqud_index));
-handles.Liquid_Type=liquid;
 T_g_in=str2num(get(handles.Inlet_Gas_Temp,'String'));
-handles.Inlet_Gas_Temp=T_g_in;
 T_l_in=str2num(get(handles.Inlet_Liquid_Temp,'String'));
-handles.Inlet_Liquid_Temp=T_l_in;
 P_g_in=str2num(get(handles.Inlet_Gas_Press,'String'));
-handles.Inlet_Gas_Press=P_g_in;
 P_l_in=str2num(get(handles.Inlet_Liquid_Press,'String'));
-handles.Inlet_Liquid_Press=P_l_in;
 m_g=str2num(get(handles.Gas_Mass_Flow,'String'));
-handles.Gas_Mass_Flow=m_g;
 m_l=str2num(get(handles.Liquid_Mass_Flow,'String'));
-handles.Liquid_Mass_Flow=m_l;
 material_index=get(handles.Tube_Material,'Value');
 material_list=cellstr(get(handles.Tube_Material,'String'));
 tube_material=char(material_list(material_index));
-handles.Tube_Material=tube_material;
 units_list=get(handles.Diameter_Units,'String');
 diameter_index=get(handles.Diameter_Units,'Value');
 diameter_units=char(units_list(diameter_index));
@@ -133,7 +109,6 @@ switch diameter_units
     case 'm'
          D_out=D_out;
 end
-handles.Tube_Diameter=D_out;
 thick_index=get(handles.Thickness_Units,'Value');
 thick_units=char(units_list(thick_index));
 t=str2num(get(handles.Tube_Thickness,'String'));
@@ -149,18 +124,14 @@ switch thick_units
     case 'm'
         t=t;
 end
-handles.Tube_Thickness=t;
 SL=str2num(get(handles.Long_Pitch_Ratio,'String'));
-handles.Long_Pitch_Ratio=SL;
 ST=str2num(get(handles.Transverse_Pitch_Ratio,'String'));
-handles.Transverse_Pitch_Ratio=ST;
 entry=str2num(get(handles.Liquid_Inlets,'String'));
-handles.Liquid_Inlets=entry;
 model_index=get(handles.Model_Selection,'Value');
 model_list=get(handles.Model_Selection,'String');
-Model_Selection=char(model_list(model_index));
-handles.Model_Selection=Model_Selection;
+model_selection=char(model_list(model_index));
 handles.Cancel_program='Run';
+save('THEEM_Input.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection')
 guidata(hObject, handles);
 close(handles.figure1); 
 
@@ -394,7 +365,7 @@ set(handles.Inlet_Liquid_Temp,'String',49.7);
 set(handles.Inlet_Liquid_Press,'String',2);
 set(handles.Liquid_Mass_Flow,'String',0.2);
 set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.035);
+set(handles.Tube_Thickness,'String',0.002);
 set(handles.Long_Pitch_Ratio,'String',1.37);
 set(handles.Transverse_Pitch_Ratio,'String',1.67);
 set(handles.Liquid_Inlets,'String',2);
@@ -702,7 +673,7 @@ set(handles.Inlet_Liquid_Temp,'String',49.7);
 set(handles.Inlet_Liquid_Press,'String',2);
 set(handles.Liquid_Mass_Flow,'String',0.2);
 set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.035);
+set(handles.Tube_Thickness,'String',0.02);
 set(handles.Long_Pitch_Ratio,'String',1.37);
 set(handles.Transverse_Pitch_Ratio,'String',1.67);
 set(handles.Liquid_Inlets,'String',2);

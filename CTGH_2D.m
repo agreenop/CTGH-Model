@@ -3,21 +3,7 @@
 %see Solidworks model.
 %Andrew Greenop June 22, 2015
 clc;clear;
-[gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry,model_selection,program]=CTGH_2D_GUI; %Allows for user input with default values from 0-D model
-if isequal(program,'Cancel')
-    return
-end
-if isequal(model_selection,'Test Bundle 1')
-    [T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,T_l_out]=Mockup1_2D(gas,liquid,T_g_in,T_l_in,P_g_in,P_l_in,m_g,m_l,tube_material,D_out,t,SL,ST,entry);
-    return
-end
-i=1;
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
-m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
-m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
-m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(36*4);
-m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
+load('THEEM_Input.mat');
 Q=zeros(3*entry+2,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
@@ -30,7 +16,15 @@ Velocity_matrix=zeros(size(Q));
 Re_g_matrix=zeros(size(Q));
 h_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
+De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
+i=size(Q,1);
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
+m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
+m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
+m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
+m_g_2_D=m_g/(36*4);
+m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -54,6 +48,7 @@ for j_entry=1:round(size(Q,2)/entry):size(Q,2) %Equally distributes entry points
 while i>0
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
+        [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=CTGH_geom(tube_material,D_out,t,ST,i);
          count_move=count_move+1;
          if j0>size(Q,2)
             j=j0-size(Q,2); %Resets j to 1 after full rotation around CTGH
@@ -85,7 +80,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t);
+       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -93,6 +88,7 @@ while i>0
        Re_g_matrix(i,j)=Re_g;
        h_g_matrix(i,j)=h_g;
        Re_l_matrix(i,j)=Re_l;
+       De_l_matrix(i,j)=De_l;
        A(count,l2)=-m_l_vol*Cp_l;
        A(count,l1)=m_l_vol*Cp_l;
        A(count,q1)=-1;
@@ -247,8 +243,6 @@ for i=[size(T_g,1)-5,size(T_g,1)-10]
          end
     end
 end
-A_sparse=sparse(A);
-B_sparse=sparse(B);
 X=mldivide(A,B); %Solves for variables (AX=B)
 [T_l,T_g,Q]=assignment(T_l,T_g,Q,X,T_l_in,T_g_in); %Resinserts values back into their respective matrix
 %This next section calculates the pressure drop of the gas
@@ -261,7 +255,7 @@ i1=1;
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t);
+                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection);
                 chi=1.15;
                 f=0.2;
                 P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
@@ -271,7 +265,8 @@ i1=1;
      end
 %This condition is met when all of the new temperatures of the liquid based 
 %on the new temperature-dependent properties are within 0.001 of all of the 
-%corresponding old temperatures based on the old temperature-dependent properties. 
+%corresponding old temperatures based on the old temperature-dependent
+%properties.
 if mean(mean(abs((T_l-T_l_out_old)./T_l)<.01))==1||inlet_prop==5
     break 
 end
@@ -287,11 +282,15 @@ UA_matrix(UA_matrix==0)=NaN;
 Re_g_matrix(Re_g_matrix==0)=NaN;
 Re_l_matrix(Re_l_matrix==0)=NaN;
 h_g_matrix(h_g_matrix==0)=NaN;
+U_avg=sum(sum(U_matrix))/nnz(U_matrix);
+A_total=sum(sum(A_matrix));
+U_matrix(U_matrix==0)=NaN;
 for i=1:size(T_l,1)
     for j=1:size(T_l,2)
         if isnan(T_l(i,j))==1
             P_l(i,j)=NaN; %Assigns "NaN" to corresponding spots in P_l matrix
             UA_matrix(i,j)=NaN; %Assigns "NaN" to corresponding spots in UA matrix
+%             U_matrix(i,j)=NaN; %Assigns "NaN" to corresponding spots in U matrix
         end
     end
 end
@@ -310,15 +309,16 @@ T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
 % T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
 T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
 % T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
-U_avg=sum(sum(U_matrix))/nnz(U_matrix);
-A_total=sum(sum(A_matrix));
 UA_total=U_avg*A_total;
 LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_avg_out-T_g_in));
 Q_m=UA_total*LMTD;
 % inlet_prop=1;
-% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i);
+% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i,j,i1,j1,m_l_t,model_selection);
 % C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
 % Q_max=C_min*(T_l_in-T_g_in);
+% e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
-CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,gas,liquid) %Plots the values
+CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
+save('THEEM_Output.mat');
+load('THEEM_Output.mat');

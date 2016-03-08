@@ -1,0 +1,79 @@
+%This program will create a 0-D model of the Coiled Gas Tube Heater.  This
+%is based off the 0-D Excel Spreadsheet.  February 23,2016
+clc;clear;
+load('THEEM_Input.mat');
+T_l_out=600; %Liquid Outlet temperature [degC] 
+T_g_out=670; %Gas outlet temperature [degC]
+T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
+T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
+LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
+%% Thermodynamic Properties
+%Average air properties
+[rho_g,cp_g,mu_g,k_g,Pr_g] = Air_prop(T_g_avg,P_g_in); %Avg. Heater Air Properties
+Vol_flow_g=m_g/rho_g; %Volumetric flow rate of gas [m^3/s]
+%Average flibe properties
+[mu_l,cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);
+Vol_flow_l=m_l/rho_l; %Volumetric flow rate of liquid [m^3/s]
+%Metal (316 SS) properties
+k_t=13.40; %316 SS thermal conductivity [W/m*K]
+rho_t=8238; %316 SS density [kg/m^3]
+Cp_t=468; %316 SS specific heat [J/kg*K]
+%% CTAH Geometry and Bundle Height
+ST=.754;
+D_in=D_out-2*t; 
+bundles=36; %Number of sub-bundles
+disk_thick=.005; %Thickness of plate separating bundles
+row_num=20; %Number of tube rows per sub-bundle
+heat_rod=1/2; %Number of heater rods in each tube row (1 every 2 rows)
+loops=3; %Number of times tubes loop around bundle
+D_curve_inner=1.324; %Average tube bundle inside diameter [m]
+spacers=2; %Number of spacer gaps in each sub-bundle (allows for air mixing)
+spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
+tube_row=5; %Number of tubes per row per manifold pipe
+tube_col=entry*(tube_row*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
+tubes=bundles*row_num*entry*(tube_row-heat_rod); %Total number of tubes in CTGH
+bank_depth=tube_col*ST*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
+D_curve_outer=D_curve_inner+2*bank_depth; %Average tube bundle outside diameter [m]
+D_curv_avg=(D_curve_outer+D_curve_inner)/2; %Diameter of the middle of the tube bundle [m]
+H=D_out*ST*tube_row*entry; %Height of sub-bundle, excluding spacer disk [m]
+H_bank=(H+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
+Area_avg=pi*D_curv_avg*(H_bank-disk_thick*bundles); %Average/Middle of bundle cross sectional area
+L_tube=loops*pi*D_curv_avg; %Average length of each tube in bundle
+Area_surf=pi*D_out*L_tube*tubes; %Surface area of tubes, based on outside diameter
+ST=1.256;
+%% Analysis of Air Cross Flow
+v_g_avg=Vol_flow_g/Area_avg; %Average velocity of gas based on bundle flow area [m/s]
+v_g_max=v_g_avg*ST/(ST-1); %Maximum gas velocity between tubes [m/s]
+Re_g=rho_g*v_g_max*D_out/mu_g; %Gas Reynolds number
+C1=.471; %Table 7.5 value from Incropera
+m=.558; %Table 7.5 value from Incropera
+Nu_g=C1*Re_g^m; %Gas Nusselt Number calculation from Incropera
+h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient
+%% Analysis of Salt Flow in Tubes
+Nu_l=3.66; %Nusselt number for liquid assuming laminar flow
+h_l=k_l*Nu_l/D_in; %Gas heat transfer coefficient
+%% Overall Heat Transfer Coefficient U
+R_g=1/h_g; %Gas thermal resistance based on outer diameter
+R_t=log(D_out/D_in)*D_out/(2*k_t); %Metal thermal resistance for pipes based on outer diameter
+R_l=(D_out/D_in)*1/h_l; %Liquid thermal resistance for pipes based on outer diameter
+% U=1/(R_g+R_t+R_l); %Overall heat transfer coefficient [W/m^2*K] based on outer diameter
+U=343.4;
+%% Surface Area and Tube Requirements
+Q_tot=m_g*cp_g*(T_g_out-T_g_in)/10^6; %Air thermal power [MW]
+% F=0.90; % Effectiveness factor (assumed)
+A_ideal=Q_tot*10^6/(U*LMTD); %Ideal (F=1) surface area based on outer diameter[m^2]
+F=A_ideal/Area_surf; %Reguired F factor needed to obtain heat transfer, Q_tot
+L_ideal=A_ideal/(pi*D_out); %Ideal total tube length
+tubes_ideal=round(L_ideal/L_tube,0); %Estimated ideal number of tubes, assuming average tube length
+%% Pressure drop across CTGH
+% Air Pressure Drop
+f=0.4; %Air friction factor from Incropera Fig. 7.14
+chi=1.00; %Correction factor from Incropera Fig. 7.14
+deltaP_tube_g=1/2*f*chi*rho_g*v_g_max^2; %Pressure drop across tube column [Pa]
+deltaP_g=deltaP_tube_g*tube_col*10^-5; %Pressure drop across entire tube bundle [bar]
+%Salt Pressure Drop
+Flow_area=tubes*pi/4*D_in^2; %Sum total of flow area inside all tubes
+v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
+Re_l=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
+f_l=64/Re_l; %Salt friction factor (assuming laminar flow)
+deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]

@@ -1,6 +1,6 @@
 %This function will map the temperatures, pressures, and heat transfer
 %outputs for the liquid coolant and gas medium for the CTGH.
-function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,gas,liquid)
+function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid)
 %Plot liquid coolant temperatures
 rho=10:size(T_l,1)+9;
 theta = linspace(90,-270,size(T_l,2))*pi/180;
@@ -92,3 +92,12 @@ view(2);
 axis equal tight;
 title([liquid ' Reynolds Number Distribution'])
 colorbar;
+figure (10)
+surf(r.*cos(th)/10,r.*sin(th)/10,U_matrix,'linestyle', 'none'); 
+view(2);
+axis equal tight;
+title(' U distribution')
+xlabel('Position on X-axis, m')
+ylabel('Position on Y-axis, m')
+colorbar;
+title(colorbar,'W/(m^2*K)');

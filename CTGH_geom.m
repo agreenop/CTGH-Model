@@ -1,11 +1,13 @@
 %This function establishes the geomtry of the CTGH bundle and of the control volume.  This function
 %will make it easy to redesign the geomerty if necessary.
-function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t]=CTGH_geom(tube_material,D_out,t,ST,i)
+function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=CTGH_geom(tube_material,D_out,t,ST,i)
 tubes_vol=23; %Number of tubes in finite volume
 N_T=5; %Number of rows in transversal direction per volume cell
 N_L=5; %Number of rows in longitudinal direction per volume cell
-tubes=13680; %Total number of tubes in CTGH
+tubes=12960; %Total number of tubes in CTGH
 D_in=D_out-2*t; %Inside diameter [m]
+R_ci=53.147*.0254/2; %Inside radius of coiled bundle [m]
+R_co=103.99*.0254/2; %Outside radius of coiled bundle [m]
 if i==1    
     L=1.585*0.0254; %Length of control volume in direction of coolant flow [m]
 elseif i==2
@@ -33,6 +35,7 @@ elseif i>=14
 end
 % H=2*D_out*ST+D_out; %Height of control volume [m]
 H=5*ST*D_out;
+R_curv=R_ci+(R_co-R_ci)*(i-1)/13; %Radius of curvature of volume element
 switch tube_material
     case '316 Stainless Steel'
         k_t=13.40; %316 SS thermal conductivity [W/m*K]
