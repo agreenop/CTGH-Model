@@ -4,7 +4,9 @@
 %Andrew Greenop June 22, 2015
 clc;clear;
 load('THEEM_Input.mat');
-Q=zeros(3*entry+2,108); %Establish grid size of system
+i=1;
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
+Q=zeros(loops*entry+spacers,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -18,12 +20,10 @@ h_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
-i=size(Q,1);
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=CTGH_geom(tube_material,D_out,t,ST,i); %Establishes geometry and material of tubes
-m_l_2_D=m_l/(36*4); %36 layers of the CTGH split into 4 each
+m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(36*4);
+m_g_2_D=m_g/(bundles*section);
 m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
@@ -48,7 +48,7 @@ for j_entry=1:round(size(Q,2)/entry):size(Q,2) %Equally distributes entry points
 while i>0
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
-        [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=CTGH_geom(tube_material,D_out,t,ST,i);
+        [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section]=CTGH_geom(tube_material,D_out,t,ST,i); 
          count_move=count_move+1;
          if j0>size(Q,2)
             j=j0-size(Q,2); %Resets j to 1 after full rotation around CTGH
@@ -290,7 +290,6 @@ for i=1:size(T_l,1)
         if isnan(T_l(i,j))==1
             P_l(i,j)=NaN; %Assigns "NaN" to corresponding spots in P_l matrix
             UA_matrix(i,j)=NaN; %Assigns "NaN" to corresponding spots in UA matrix
-%             U_matrix(i,j)=NaN; %Assigns "NaN" to corresponding spots in U matrix
         end
     end
 end

@@ -3,7 +3,9 @@
 %tailored specifically for that model.
 clc;clear;
 load('THEEM_Input.mat');
-Q=zeros(4*entry,50); %Establish grid size of system
+i=1;
+[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops]=Mockup1_geom(tube_material,D_out,t,i); %Establishes geometry and material of tubes
+Q=zeros(loops*entry,50); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -16,8 +18,6 @@ Re_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
-i=size(Q,1);
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=Mockup1_geom(tube_material,D_out,t,i); %Establishes geometry and material of tubes
 m_l_2_D=m_l; %The test-bundle is calculated in 1 layer
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume

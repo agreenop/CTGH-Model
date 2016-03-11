@@ -1,7 +1,8 @@
 %This program will create a 0-D model of the Coiled Gas Tube Heater.  This
 %is based off the 0-D Excel Spreadsheet.  February 23,2016
-clc;clear;
-load('THEEM_Input.mat');
+function CTGH_0D_calculations(i)
+fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
+load(fname1);
 T_l_out=600; %Liquid Outlet temperature [degC] 
 T_g_out=670; %Gas outlet temperature [degC]
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
@@ -80,3 +81,6 @@ v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
 Re_l=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
 f_l=64/Re_l; %Salt friction factor (assuming laminar flow)
 deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]
+%% Save variables to output files
+fname2=sprintf('Optimization_Files/Outputs/Output%d.mat',i);
+save(fname2);
