@@ -1,6 +1,6 @@
 %This function establishes the geomtry of the CTGH bundle and of the control volume.  This function
 %will make it easy to redesign the geomerty if necessary.
-function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i)
+function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i)
 %% Volume Cell Parameters
 N_T=5; %Number of rows in transversal/vertical direction per volume cell
 N_L=5; %Number of columns in longitudinal/radial direction per volume cell
