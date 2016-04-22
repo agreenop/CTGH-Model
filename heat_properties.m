@@ -81,5 +81,14 @@ end
 Nu_g=C2*C1*Re_g^m*Pr_g^0.36; %Tube bank Nusselt correlation, 0.7<Pr<2000, 1000<Re_g<2*10^6 (Incropera Eq. 7.56)
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient 
 R_g=1/(tubes_vol*pi*D_out*L*h_g); %Gas thermal resistance
-UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
+if isequal(model_selection,'Test Bundle 1')
+    sigma_SB=5.670367*10^-8; %W/(m^2*K^4)
+    e_tube=0.28;
+    e_surr=0.94;
+    h_rad=sigma_SB*((T_l_avg+273.15)^2+(T_g_in+273.15)^2)*((T_l_avg+273.15)+(T_g_in+273.15))/((1/e_tube)+(1/e_surr)-1);
+    R_rad=1/(tubes_vol*pi*D_out*L*h_rad);
+    UA=1/(R_l+R_t+(R_g*R_rad)/(R_g+R_rad));
+else
+    UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
+end
 Area=tubes_vol*pi*D_out*L; %Outer surface area of tubes in volume

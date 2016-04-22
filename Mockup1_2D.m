@@ -18,6 +18,7 @@ Re_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
+P_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 m_l_2_D=m_l; %The test-bundle is calculated in 1 layer
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
@@ -146,6 +147,7 @@ while i>0
            A(count,g2)=m_g_vol*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature position of this loop in azimuthal direction
+           P_l_out(entry_number,1)=j1;
            entry_number=entry_number+1; %Moves counter to next loop.
            i=0;
            break %Exit for loop. i=0 fullfills while condition.
@@ -158,6 +160,7 @@ while i>0
            A(count,g2)=m_g_vol*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature of this loop
+           P_l_out(entry_number,1)=j1;
            entry_number=entry_number+1; %Moves counter to next loop.
            i=0;
            break %Exit for loop. i=0 fullfills while condition.
@@ -220,7 +223,9 @@ end
 %This next section will calculate the effectiveness of the heat exchanger.
 for entry_number=1:size(T_l_out,1)
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
+    P_l_out(entry_number,1)=P_l(1,P_l_out(entry_number,1));%Records outlet pressure of each loop
 end
+P_l_out=P_l_out-((64/Re_l)*((66*.0254)/D_in^5)*(8*m_l_t^2/(pi^2*rho_l))+(2.0+1+0.3)*(8*m_l_t^2/(pi^2*rho_l*D_in^4)))*10^-5;
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
 % T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
 T_l_avg_out=mean(T_l_out); %Average liquid outlet temperature

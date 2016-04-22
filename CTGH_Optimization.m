@@ -24,11 +24,11 @@ T={'Run','Outside Diameter [in]','Thickness [in]','Longitudinal Pitch',...
    'Total Surface Area [m^2]','Max Air Velocity [m/s]',...
    'Air Reynolds Number','U Coefficient [W/m^2*K]',...
    'Ideal Surface Area [m^2]','Min F Factor','Air Pressure Drop [bar]',...
-   'Liquid Pressure Drop [bar]'}; %Column labels in the Excel Spreadsheet
-xlswrite('Optimization_Files/Optimization_Results.xlsx',T,'A1:Q1') 
+   'Liquid Pressure Drop [bar]','Tube Bank Depth [m]'}; %Column labels in the Excel Spreadsheet
+xlswrite('Optimization_Files/Optimization_Results.xlsx',T,'A1:R1') 
 %% Tube outside diameters and thicknesses obtained from McMaster-Carr website
 for i=1:3000 %Run 3000 different scenarios
-Diameters=[1/16:1/32:5/16,3/8,7/16,1/2,5/8,11/16,3/4,7/8,1,1.25,1.375,1.5,1.75,2,2.125,2.25,2.375,2.5,3]; %Diameters in inches
+Diameters=[1/16:1/32:5/16,3/8,7/16,1/2,5/8,11/16];%,3/4,7/8,1,1.25,1.375,1.5,1.75,2,2.125,2.25,2.375,2.5,3]; %Diameters in inches
 D_out=Diameters(randi(numel(Diameters))); %Randomly selects a tube outisde diameter for the design
 switch D_out %Assign tube thicknesses based on diameter in inches
     case 1/16
@@ -59,44 +59,52 @@ switch D_out %Assign tube thicknesses based on diameter in inches
         thickness=[0.02,0.028,0.035,0.049,0.065,0.083,0.12];
     case 11/16
         thickness=0.065;
-    case 3/4
-        thickness=[0.035,0.049,0.065,0.083,0.12];
-    case 7/8
-        thickness=[0.035,0.049,0.065,0.12];
-    case 1
-        thickness=[0.035,0.049,0.065,0.083,0.12];
-    case 1.25
-        thickness=[0.035,0.049,0.065,0.083,0.12];
-    case 1.375
-        thickness=[0.035,0.049,0.065];
-    case 1.5
-        thickness=[0.049,0.065,0.095,0.12];
-    case 1.75
-        thickness=0.065;
-    case 2
-        thickness=[0.065,0.12];
-    case 2.125
-        thickness=0.065;
-    case 2.25
-        thickness=0.065;
-    case 2.375
-        thickness=0.065;
-    case 2.5
-        thickness=0.065;
-    case 3
-        thickness=0.065;
+%     case 3/4
+%         thickness=[0.035,0.049,0.065,0.083,0.12];
+%     case 7/8
+%         thickness=[0.035,0.049,0.065,0.12];
+%     case 1
+%         thickness=[0.035,0.049,0.065,0.083,0.12];
+%     case 1.25
+%         thickness=[0.035,0.049,0.065,0.083,0.12];
+%     case 1.375
+%         thickness=[0.035,0.049,0.065];
+%     case 1.5
+%         thickness=[0.049,0.065,0.095,0.12];
+%     case 1.75
+%         thickness=0.065;
+%     case 2
+%         thickness=[0.065,0.12];
+%     case 2.125
+%         thickness=0.065;
+%     case 2.25
+%         thickness=0.065;
+%     case 2.375
+%         thickness=0.065;
+%     case 2.5
+%         thickness=0.065;
+%     case 3
+%         thickness=0.065;
 end
 t=thickness(randi(numel(thickness))); %Randomly picks one of the thicknesses associated with the chosen diameter
 D_out=D_out*0.0254; %Converts diameters to meters
 t=t*0.0254; %Converts thickeness to meters
 %% Randomly choose other inlet parameters
+%These other inlet parameters are restricted so that the maximum depth of
+%the tube bundle is 0.75 m (without sloping tubes).  The maximum cap is
+%calculated at 0.0225 assuming that there are always 2 spacers, the spacer
+%widths are constant (0.038 m), each tube loops 3 times around the CTGH,
+%and each tube bank from each manifold pipe has 5 tubes per row.
+cap=1; %Start loop
+while cap > 0.0375 
 entry=randi([2,6]);
-% SL=1.45;
-SL=(3-0.6)*rand+0.6; %Generates a random value for SL between 0.6 & 3.0
-if SL<1
-    ST=(3-1.6)*rand+1.6; %If SL is less than 1, ST must be greater 1.6
+SL=(2.0-1.0)*rand+1.0; %Generates a random value for SL between 1.0 & 2.0
+if SL<1.25
+    ST=(2.0-1.5)*rand+1.5; %If SL is less than 1.25, ST must be between 1.5 and 2.0
 else
-    ST=(3-1.25)*rand+1.25; %Otherwise ST is between 1.25 and 3.0
+    ST=(2.0-1.25)*rand+1.25; %Otherwise ST is between 1.25 and 2.0
+end
+cap=entry*SL*D_out;
 end
 fname=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
 save(fname,'m_g','m_l','P_g_in','P_l_in','T_g_in','T_l_in','D_out','t','SL','ST','entry');

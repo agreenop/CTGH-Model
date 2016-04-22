@@ -21,34 +21,42 @@ k_t=13.40; %316 SS thermal conductivity [W/m*K]
 rho_t=8238; %316 SS density [kg/m^3]
 Cp_t=468; %316 SS specific heat [J/kg*K]
 %% CTAH Geometry and Bundle Height
-% ST=.754;
 D_in=D_out-2*t; 
 bundles=36; %Number of sub-bundles
-disk_thick=.005; %Thickness of plate separating bundles
-row_num=20; %Number of tube rows per sub-bundle
+disk_thick=.003; %Thickness of plate separating bundles
+row_num=34; %Number of tube rows per sub-bundle
 heat_rod=1/2; %Number of heater rods in each tube row (1 every 2 rows)
 loops=3; %Number of times tubes loop around bundle
 D_curve_inner=1.324; %Average tube bundle inside diameter [m]
 spacers=2; %Number of spacer gaps in each sub-bundle (allows for air mixing)
 spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
-tube_row=5; %Number of tubes per row per manifold pipe
+tube_row=3; %Number of tubes per row per manifold pipe
 tube_col=entry*(tube_row*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
 tubes=bundles*row_num*entry*(tube_row-heat_rod); %Total number of tubes in CTGH
 bank_depth=tube_col*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
 D_curve_outer=D_curve_inner+2*bank_depth; %Average tube bundle outside diameter [m]
 D_curv_avg=(D_curve_outer+D_curve_inner)/2; %Diameter of the middle of the tube bundle [m]
-H=D_out*ST*tube_row*entry; %Height of sub-bundle, excluding spacer disk [m]
+H=D_out*ST*(row_num+1)/2; %Height of sub-bundle, excluding spacer disk [m]
 H_bank=(H+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
 Area_avg=pi*D_curv_avg*(H_bank-disk_thick*bundles); %Average/Middle of bundle cross sectional area
 L_tube=loops*pi*D_curv_avg; %Average length of each tube in bundle
 Area_surf=pi*D_out*L_tube*tubes; %Surface area of tubes, based on outside diameter
-% ST=1.256;
 %% Analysis of Air Cross Flow
 v_g_avg=Vol_flow_g/Area_avg; %Average velocity of gas based on bundle flow area [m/s]
 v_g_max=v_g_avg*ST/(ST-1); %Maximum gas velocity between tubes [m/s]
 Re_g=rho_g*v_g_max*D_out/mu_g; %Gas Reynolds number
-C1=.471; %Table 7.5 value from Incropera
-m=.558; %Table 7.5 value from Incropera
+SL_list=[0.90,1,1.125,1.25,1.5,2,3];%Table 7.5 values from Incropera
+ST_list=[1.25,1.5,2.0,3.0];%Table 7.5 values from Incropera
+C1_table=[NaN,NaN,NaN,0.5180,0.4510,0.4040,0.3100;
+          NaN,0.4970,0.5010,0.5050,0.4600,0.4160,0.3560;
+          0.4460,0.4602,0.4780,0.5190,0.4520,0.4820,0.4400;
+          0.4010,0.4530,0.5180,0.5220,0.4880,0.4490,0.4280];%Table 7.5 values from Incropera
+m_table=[NaN,NaN,NaN,0.556,0.568,0.572,0.592;
+          NaN,0.558,0.556,0.554,0.562,0.568,0.580;
+          0.571,0.5683,0.565,0.556,0.568,0.556,0.562;
+          0.581,0.5717,0.560,0.562,0.568,0.570,0.574];%Table 7.5 values from Incropera
+C1=interp2(SL_list,ST_list,C1_table,SL,ST); %Interpolated from table values
+m=interp2(SL_list,ST_list,m_table,SL,ST); %Interpolated from table values
 Nu_g=C1*Re_g^m; %Gas Nusselt Number calculation from Incropera
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient
 %% Analysis of Salt Flow in Tubes
@@ -59,7 +67,6 @@ R_g=1/h_g; %Gas thermal resistance based on outer diameter
 R_t=log(D_out/D_in)*D_out/(2*k_t); %Metal thermal resistance for pipes based on outer diameter
 R_l=(D_out/D_in)*1/h_l; %Liquid thermal resistance for pipes based on outer diameter
 U=1/(R_g+R_t+R_l); %Overall heat transfer coefficient [W/m^2*K] based on outer diameter
-% U=343.4;
 %% Surface Area and Tube Requirements
 Q_tot=m_g*cp_g*(T_g_out-T_g_in)/10^6; %Air thermal power [MW]
 % F=0.90; % Effectiveness factor (assumed)
