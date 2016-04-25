@@ -20,6 +20,7 @@ h_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
+P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
 m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
@@ -302,6 +303,7 @@ for i=1:size(T_g,1)
 end
 %This next section will calculate the effectiveness of the heat exchanger.
 for entry_number=1:size(T_l_out,1)
+    P_l_out(entry_number,1)=P_l(1,T_l_out(entry_number,1)); %Records outlet pressure of each loop
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
 end
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature

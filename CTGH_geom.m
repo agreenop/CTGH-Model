@@ -6,7 +6,7 @@ N_T=7; %Number of rows in transverse/vertical direction per volume cell
 N_L=3; %Number of columns in longitudinal/radial direction per volume cell
 %% General CTGH Parameters
 loops=3; %Number of times tube loops around CTGH
-row_num=34; %Number of tube rows per sub-bundle
+row_num=35; %Number of tube rows per sub-bundle
 tube_row=3; %Number of tubes per row per manifold pipe
 heat_rod=1/2; %Number of heater rods in each tube row (1 every 2 rows)
 bundles=36; %Number of sub-bundles in CTGH

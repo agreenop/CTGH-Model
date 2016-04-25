@@ -63,7 +63,7 @@ Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocit
 % %End of Khan Paper equations
 if N_L==2
     C2=0.76;
-elseif N_L==5
+elseif N_L==3
     C2=0.92;
 end
 if Re_g<2*10^5

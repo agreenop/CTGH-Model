@@ -1,7 +1,8 @@
 %This program will create a 2-D model (radial and azimuthal) of a section
 %of the CTGH assuming the gas is only flowing in the radial direction.
 %This program is used in the 3-D model.
-function CTGH_2D_calculations(
+function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon]=CTGH_2D_calculations(m_l_2_D,m_g_2_D)
+load('THEEM_3D_Input.mat');
 i=1;
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
 Q=zeros(loops*entry+spacers,108); %Establish grid size of system
@@ -18,11 +19,10 @@ h_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
-m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
-m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
+P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(bundles*section);
-m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
+m_l_t=m_l_vol/(N_T*N_L); %Mass flow of coolant per tube assuming even distribution
+m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume 
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -300,8 +300,10 @@ for i=1:size(T_g,1)
 end
 %This next section will calculate the effectiveness of the heat exchanger.
 for entry_number=1:size(T_l_out,1)
+    P_l_out(entry_number,1)=P_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
 end
+T_g_out=T_g(size(T_g,1),:);
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
 % T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
 T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
@@ -315,7 +317,7 @@ Q_m=UA_total*LMTD;
 % Q_max=C_min*(T_l_in-T_g_in);
 % e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
-fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
-CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
-save('THEEM_Output.mat');
-load('THEEM_Output.mat');
+% fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
+% CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
+% save('THEEM_Output.mat');
+% load('THEEM_Output.mat');
