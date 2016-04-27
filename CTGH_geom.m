@@ -2,12 +2,12 @@
 %will make it easy to redesign the geomerty if necessary.
 function [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles,L_tube_avg]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i)
 %% Volume Cell Parameters
-N_T=7; %Number of rows in transverse/vertical direction per volume cell
-N_L=3; %Number of columns in longitudinal/radial direction per volume cell
+N_T=5; %Number of rows in transverse/vertical direction per volume cell
+N_L=5; %Number of columns in longitudinal/radial direction per volume cell
 %% General CTGH Parameters
 loops=3; %Number of times tube loops around CTGH
-row_num=35; %Number of tube rows per sub-bundle
-tube_row=3; %Number of tubes per row per manifold pipe
+row_num=20; %Number of tube rows per sub-bundle
+tube_row=5; %Number of tubes per row per manifold pipe
 heat_rod=1/2; %Number of heater rods in each tube row (1 every 2 rows)
 bundles=36; %Number of sub-bundles in CTGH
 spacers=2; %Number of spacer gaps in each sub-bundle (allows for air mixing)
@@ -15,7 +15,7 @@ spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
 R_ci=1.324/2; %Inside radius of coiled bundle [m]
 %% Calculated CTGH Geometry Parameters
 tubes_vol=N_T*(tube_row-heat_rod); %Number of tubes in finite volume
-vol_wid=(tube_row*2)*SL*D_out; %Width of a volume element in radial direction
+vol_wid=(tube_row)*(SL+1)*D_out; %Width of a volume element in radial direction
 section=row_num/N_T; %Number of rows of volume cells vertically per sub-bundle 
 tubes_manifold=row_num*(tube_row-heat_rod); %Number of tubes per manifold per sub-bundle
 tubes=entry*tubes_manifold*bundles; %Total number of tubes in CTGH

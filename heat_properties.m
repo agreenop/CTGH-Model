@@ -28,17 +28,19 @@ end
 switch gas %Gas properties depending on type of gas
     case 'Air'
         [rho_g,Cp_g,mu_g,k_g,Pr_g] = Air_prop(T_g_avg,P_g_avg);
+        [~,~,~,~,Pr_s]=Air_prop(T_l_avg,P_g_avg);
 end
 %This next part finds UA.
 Re_l=4*m_l_t/(pi*D_in*mu_l); %Reynolds number for liquid
 De_l=Re_l*sqrt(D_in/(2*R_curv)); %Dean number for liquid through a curved pipe
-Re_c=2100*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe
+Re_c=2300*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe
 if Re_l<=Re_c %Laminar flow
-    Nu_l=((3.657+4.343/(1+957/(De_l*Pr_l))^2)^3+1.158*(De_l/(1+.477/Pr_l))^(3/2))^(1/3); %Nusselt number for fully developed laminar flow in a curved pipe with uniform wall temp (Manlapaz/Churchill)
+    Nu_l=((3.657+4.343/(1+957/(De_l^2*Pr_l))^2)^3+1.158*(De_l/(1+.477/Pr_l))^(3/2))^(1/3); %Nusselt number for fully developed laminar flow in a curved pipe with uniform wall temp (Manlapaz/Churchill)
     if De_l<=11.6
         f_l=64/Re_l; %Friction Factor for laminar flow in pipe
     elseif De_l>11.6 && De_l<=2000
-        f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
+%         f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
+          f_l=64/Re_l;
     elseif De_l>2000
         f_l=7.0144*sqrt(De_l)/Re_l;
     end
@@ -63,8 +65,12 @@ Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocit
 % %End of Khan Paper equations
 if N_L==2
     C2=0.76;
-elseif N_L==3
-    C2=0.92;
+elseif N_L==5
+    if i<=4
+        C2=0.92;
+    else
+        C2=1;
+    end
 end
 if Re_g<2*10^5
     if ST/SL <2
@@ -78,17 +84,21 @@ else
     m=0.84;
     C1=0.022;
 end
-Nu_g=C2*C1*Re_g^m*Pr_g^0.36; %Tube bank Nusselt correlation, 0.7<Pr<2000, 1000<Re_g<2*10^6 (Incropera Eq. 7.56)
+if inlet_prop==1
+    Nu_g=C2*C1*Re_g^m*Pr_g^0.36; %Tube bank Nusselt correlation, 0.7<Pr<2000, 1000<Re_g<2*10^6 (Incropera Eq. 7.56)
+else
+    Nu_g=C2*C1*Re_g^m*Pr_g^(0.36)*(Pr_g/Pr_s)^(1/4);
+end    
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient 
 R_g=1/(tubes_vol*pi*D_out*L*h_g); %Gas thermal resistance
-if isequal(model_selection,'Test Bundle 1')
-    sigma_SB=5.670367*10^-8; %W/(m^2*K^4)
-    e_tube=0.28;
-    e_surr=0.94;
-    h_rad=sigma_SB*((T_l_avg+273.15)^2+(T_g_in+273.15)^2)*((T_l_avg+273.15)+(T_g_in+273.15))/((1/e_tube)+(1/e_surr)-1);
-    R_rad=1/(tubes_vol*pi*D_out*L*h_rad);
-    UA=1/(R_l+R_t+(R_g*R_rad)/(R_g+R_rad));
-else
+% if isequal(model_selection,'Test Bundle 1')
+%     sigma_SB=5.670367*10^-8; %W/(m^2*K^4)
+%     e_tube=0.28;
+%     e_surr=0.94;
+%     h_rad=sigma_SB*((T_l_avg+273.15)^2+(T_g_in+273.15)^2)*((T_l_avg+273.15)+(T_g_in+273.15))/((1/e_tube)+(1/e_surr)-1);
+%     R_rad=1/(tubes_vol*pi*D_out*L*h_rad);
+%     UA=1/(R_l+R_t+(R_g*R_rad)/(R_g+R_rad));
+% else
     UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
-end
+% end
 Area=tubes_vol*pi*D_out*L; %Outer surface area of tubes in volume
