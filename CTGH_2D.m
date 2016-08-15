@@ -7,6 +7,7 @@ load('THEEM_Input.mat');
 i=1;
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
 Q=zeros(loops*entry+spacers,108); %Establish grid size of system
+% Q=zeros(loops*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -307,19 +308,20 @@ for entry_number=1:size(T_l_out,1)
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
 end
 T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
-% T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
+T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
 T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
-% T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
+T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
 UA_total=U_avg*A_total;
 LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_avg_out-T_g_in));
 Q_m=UA_total*LMTD;
-% inlet_prop=1;
-% [UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i,j,i1,j1,m_l_t,model_selection);
-% C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
-% Q_max=C_min*(T_l_in-T_g_in);
-% e1=Q_actual/Q_max;
+inlet_prop=1;
+i=1;
+[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i,j,i1,j1,m_l_t,model_selection,entry);
+C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
+Q_max=C_min*(T_l_in-T_g_in);
+e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
-fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
+fprintf('The effectiveness of this heat exchanger is %4.4f.\n',e1)
 CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
 save('THEEM_Output.mat');
 load('THEEM_Output.mat');

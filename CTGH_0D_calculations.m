@@ -3,8 +3,6 @@
 function CTGH_0D_calculations(i)
 fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
 load(fname1);
-T_l_out=600; %Liquid Outlet temperature [degC] 
-T_g_out=670; %Gas outlet temperature [degC]
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
 T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
 LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
@@ -25,19 +23,19 @@ Cp_t=468; %316 SS specific heat [J/kg*K]
 D_in=D_out-2*t; 
 bundles=36; %Number of sub-bundles
 disk_thick=.003; %Thickness of plate separating bundles
-row_num=34; %Number of tube rows per sub-bundle
+% row_num=34; %Number of tube layers per sub-bundle
 heat_rod=1/2; %Number of heater rods in each tube row (1 every 2 rows)
 loops=3; %Number of times tubes loop around bundle
 D_curve_inner=1.324; %Average tube bundle inside diameter [m]
 spacers=2; %Number of spacer gaps in each sub-bundle (allows for air mixing)
 spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
-tube_row=3; %Number of tubes per row per manifold pipe
+% tube_row=3; %Number of tubes per row per manifold pipe
 tube_col=entry*(tube_row*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
 tubes=bundles*row_num*entry*(tube_row-heat_rod); %Total number of tubes in CTGH
 bank_depth=tube_col*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
 D_curve_outer=D_curve_inner+2*bank_depth; %Average tube bundle outside diameter [m]
 D_curv_avg=(D_curve_outer+D_curve_inner)/2; %Diameter of the middle of the tube bundle [m]
-H=D_out*ST*(row_num+1)/2; %Height of sub-bundle, excluding spacer disk [m]
+H=D_out*ST*((row_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
 H_bank=(H+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
 Area_avg=pi*D_curv_avg*(H_bank-disk_thick*bundles); %Average/Middle of bundle cross sectional area
 L_tube=loops*pi*D_curv_avg; %Average length of each tube in bundle
@@ -75,6 +73,9 @@ A_ideal=Q_tot*10^6/(U*LMTD); %Ideal (F=1) surface area based on outer diameter[m
 F=A_ideal/Area_surf; %Reguired F factor needed to obtain heat transfer, Q_tot
 L_ideal=A_ideal/(pi*D_out); %Ideal total tube length
 tubes_ideal=round(L_ideal/L_tube,0); %Estimated ideal number of tubes, assuming average tube length
+C_min=min(m_g*cp_g,m_l*cp_l);
+Q_max=C_min*(T_l_in-T_g_in)/10^6;
+e1=Q_tot/Q_max;
 %% Pressure drop across CTGH
 % Air Pressure Drop
 f=0.4; %Air friction factor from Incropera Fig. 7.14
@@ -91,6 +92,6 @@ deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundl
 %% Save variables to output files
 fname2=sprintf('Optimization_Files/Outputs/Output%d.mat',i);
 save(fname2,'tubes','D_curve_outer','H_bank','Area_surf','v_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
-range_output=sprintf('G%d:R%d',i+1,i+1);
+range_output=sprintf('I%d:T%d',i+1,i+1);
 B=[tubes,D_curve_outer,H_bank,Area_surf,v_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
 xlswrite('Optimization_Files/Optimization_Results.xlsx',B,range_output);

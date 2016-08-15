@@ -15,7 +15,7 @@ spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
 R_ci=1.324/2; %Inside radius of coiled bundle [m]
 %% Calculated CTGH Geometry Parameters
 tubes_vol=N_T*(tube_row-heat_rod); %Number of tubes in finite volume
-vol_wid=(tube_row)*(SL+1)*D_out; %Width of a volume element in radial direction
+vol_wid=(tube_row+1)*SL*D_out; %Width of a volume element in radial direction
 section=row_num/N_T; %Number of rows of volume cells vertically per sub-bundle 
 tubes_manifold=row_num*(tube_row-heat_rod); %Number of tubes per manifold per sub-bundle
 tubes=entry*tubes_manifold*bundles; %Total number of tubes in CTGH
@@ -25,45 +25,21 @@ bank_depth=tube_col*SL*D_out+spacers*spacer_width; %Depth of tube bank based on 
 R_co=R_ci+bank_depth; %Average tube bundle outside radius [m]
 R_c_avg=R_ci+0.5*bank_depth; %Radius to middle of tube bundle [m]
 L_tube_avg=loops*pi*2*R_c_avg; %Average length of each tube in bundle [m]
-% R_co=103.99*.0254/2; %Outside radius of coiled bundle [m]
-% if i==1
-%     L=1.585*0.0254; %Length of control volume in direction of coolant flow [m]
-% elseif i==2
-%     L=1.683*0.0254;
-% elseif i==3
-%     L=1.788*0.0254;
-% elseif i==4
-%     L=1.894*0.0254;
-% elseif i==5||i==6
-%     L=2.076*0.0254;
-% elseif i==7
-%     L=2.181*0.0254;
-% elseif i==8
-%     L=2.286*0.0254;
-% elseif i==9||i==10
-%     L=2.392*0.0254;
-% elseif i==11
-%     L=2.574*0.0254;
-% elseif i==12
-%     L=2.679*0.0254;
-% elseif i==13
-%     L=2.784*0.0254;
-% elseif i>=14
-%     L=2.89*0.0254;
-% end
 H=2*D_out*(ST+1); %Height of control volume [m]
-% H=5*ST*D_out; %Height of control volume [m]
-% R_curv=R_ci+(R_co-R_ci)*(i-1/2)/13; %Radius of curvature of volume element
 if i<=entry
     R_curv=R_ci+(vol_wid)*(i-1/2);
 elseif i==entry+1
     R_curv=R_ci+(vol_wid)*entry+spacer_width/2;
+%     R_curv=R_ci+(vol_wid)*entry;
 elseif i<=2*entry+1
     R_curv=R_ci+(vol_wid)*entry+spacer_width+vol_wid*(i-11/2);
+%     R_curv=R_ci+(vol_wid)*entry+vol_wid*(i-11/2);
 elseif i==2*entry+2
     R_curv=R_ci+(vol_wid)*entry*2+(3/2)*spacer_width;
+%     R_curv=R_ci+(vol_wid)*entry*2;    
 elseif i<=3*entry+2
     R_curv=R_ci+(vol_wid)*entry*2+2*spacer_width+vol_wid*(i-21/2);
+%     R_curv=R_ci+(vol_wid)*entry*2+vol_wid*(i-21/2);
 end
 L=R_curv*2*pi/108; %Length of control volume in direction of coolant flow [m]
 %% Tube Material Properties

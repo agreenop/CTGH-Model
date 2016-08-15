@@ -39,8 +39,7 @@ if Re_l<=Re_c %Laminar flow
     if De_l<=11.6
         f_l=64/Re_l; %Friction Factor for laminar flow in pipe
     elseif De_l>11.6 && De_l<=2000
-%         f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
-          f_l=64/Re_l;
+         f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
     elseif De_l>2000
         f_l=7.0144*sqrt(De_l)/Re_l;
     end
@@ -54,20 +53,18 @@ end
 h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient 
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes
 R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes
-%Air flow across cross flow tubes.  See Khan paper.
+%Air flow across cross flow tubes. 
 u_app_g=m_g_vol/(rho_g*H*L); %Approach velocity of gas
 u_max_app=max((ST/(ST-1))*u_app_g,(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))*u_app_g); %Max velocity of gas/ velocity of gas between tubes
 Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocity
-% C2=(0.588+0.004*ST)*(0.858+0.04*ST-0.008*ST^2)^(1/SL);
-% Nu_df_g=C2*Re_g^(1/2)*Pr_g^(1/3)+0.001*Re_g; 
-% C1=(1.21+1.64*N_L^1.44)/(1.87+N_L^1.44);
-% Nu_g=C1*Nu_df_g; %Nusselt number for gas
-% %End of Khan Paper equations
 if N_L==2
     C2=0.76;
 elseif N_L==5
-    if i<=4
-        C2=0.92;
+    N_L_list=[1,2,3,4,5,7,10,13,16];
+    C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99];
+    tube_count=N_L*i;
+    if tube_count<20
+        C2=interp1(N_L_list,C2_list,tube_count);
     else
         C2=1;
     end

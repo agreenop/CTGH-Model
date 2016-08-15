@@ -1,7 +1,7 @@
 %This program will create a 2-D model (radial and azimuthal) of a section
 %of the CTGH assuming the gas is only flowing in the radial direction.
 %This program is used in the 3-D model.
-function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon]=CTGH_2D_calculations(m_l_2_D,m_g_2_D)
+function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D_calculations(m_l_2_D,m_g_2_D)
 load('THEEM_3D_Input.mat');
 i=1;
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
