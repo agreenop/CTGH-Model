@@ -1,26 +1,26 @@
-function varargout = Start_THEEM(varargin)
-% START_THEEM MATLAB code for Start_THEEM.fig
-%      START_THEEM, by itself, creates a new START_THEEM or raises the existing
+function varargout = Start_THEEM_2D(varargin)
+% Start_THEEM_2D MATLAB code for Start_THEEM_2D.fig
+%      Start_THEEM_2D, by itself, creates a new Start_THEEM_2D or raises the existing
 %      singleton*.
 %
-%      H = START_THEEM returns the handle to a new START_THEEM or the handle to
+%      H = Start_THEEM_2D returns the handle to a new Start_THEEM_2D or the handle to
 %      the existing singleton*.
 %
-%      START_THEEM('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in START_THEEM.M with the given input arguments.
+%      Start_THEEM_2D('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in Start_THEEM_2D.M with the given input arguments.
 %
-%      START_THEEM('Property','Value',...) creates a new START_THEEM or raises the
+%      Start_THEEM_2D('Property','Value',...) creates a new Start_THEEM_2D or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before Start_THEEM_OpeningFcn gets called.  An
+%      applied to the GUI before Start_THEEM_2D_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to Start_THEEM_OpeningFcn via varargin.
+%      stop.  All inputs are passed to Start_THEEM_2D_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help Start_THEEM
+% Edit the above text to modify the response to help Start_THEEM_2D
 
 % Last Modified by GUIDE v2.5 18-Feb-2016 15:21:43
 
@@ -28,8 +28,8 @@ function varargout = Start_THEEM(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @Start_THEEM_OpeningFcn, ...
-                   'gui_OutputFcn',  @Start_THEEM_OutputFcn, ...
+                   'gui_OpeningFcn', @Start_THEEM_2D_OpeningFcn, ...
+                   'gui_OutputFcn',  @Start_THEEM_2D_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,26 +44,26 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before Start_THEEM is made visible.
-function Start_THEEM_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before Start_THEEM_2D is made visible.
+function Start_THEEM_2D_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to Start_THEEM (see VARARGIN)
+% varargin   command line arguments to Start_THEEM_2D (see VARARGIN)
 
-% Choose default command line output for Start_THEEM
+% Choose default command line output for Start_THEEM_2D
 handles.output = hObject;
 % handles.Cancel_program='Cancel';
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes Start_THEEM wait for user response (see UIRESUME)
+% UIWAIT makes Start_THEEM_2D wait for user response (see UIRESUME)
 uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = Start_THEEM_OutputFcn(hObject, eventdata, handles) 
+function varargout = Start_THEEM_2D_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -82,17 +82,17 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
-load('THEEM_Input.mat');
+load('THEEM_Input_2D.mat');
 if isequal(model_selection,'Test Bundle 1')
     clc;clear;
     run('Mockup1_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
+    load('THEEM_Input_2D.mat');
+    load('THEEM_Output_2D.mat');
 else
     clc;clear;
     run('CTGH_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
+    load('THEEM_Input_2D.mat');
+    load('THEEM_Output_2D.mat');
 end
 
 % --- Executes on button press in New_button.
@@ -100,21 +100,24 @@ function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-CTGH_2D_GUI;
-load('THEEM_Input.mat');
+varargout=CTGH_2D_GUI
+cancel='Cancel';
+if strcmp(varargout,cancel)==0    
+    load('THEEM_Input_2D.mat');
 % handles.Cancel_program=program;
 guidata(hObject, handles);
 close(handles.figure1);
 if isequal(model_selection,'Test Bundle 1')
     clc;clear;
     run('Mockup1_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
+    load('THEEM_Input_2D.mat');
+    load('THEEM_Output_2D.mat');
 else
     clc;clear;
     run('CTGH_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
+    load('THEEM_Input_2D.mat');
+    load('THEEM_Output_2D.mat');
+end
 end
 
 
@@ -145,5 +148,5 @@ if isequal(get(hObject, 'waitstatus'), 'waiting')
 else
     % The GUI is no longer waiting, just close it
     delete(hObject);
-    load('THEEM_Output.mat');
+    load('THEEM_Output_2D.mat');
 end

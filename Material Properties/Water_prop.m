@@ -4,7 +4,7 @@
 %based on the temperature given in Celsius.  It is assumed that
 %thermophysical properties of saturated water are approximately the same for 
 %non-saturated liquid water.
-function [mu_l,Cp_l,k_l,rho_l,nu_l,Pr_l] = Water_prop(T_l_avg) %Temp is in Celsius
+function [mu_l,Cp_l,k_l,rho_l,Pr_l,nu_l] = Water_prop(T_l_avg) %Temp is in Celsius
 T_l_avg_K=T_l_avg+273.15;
 water=csvread('water_data.csv',1,0); %Water data from Incropera
 rho_l=interp1(water(:,1),water(:,2),T_l_avg_K); %[kg/m^3]

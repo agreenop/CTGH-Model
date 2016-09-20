@@ -131,7 +131,7 @@ model_index=get(handles.Model_Selection,'Value');
 model_list=get(handles.Model_Selection,'String');
 model_selection=char(model_list(model_index));
 handles.Cancel_program='Run';
-save('THEEM_Input.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection')
+save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection')
 guidata(hObject, handles);
 close(handles.figure1); 
 
@@ -345,12 +345,12 @@ set(handles.Inlet_Gas_Temp,'String',418.6);
 set(handles.Inlet_Gas_Press,'String',18.76);
 set(handles.Gas_Mass_Flow,'String',418.5);
 set(handles.Inlet_Liquid_Temp,'String',700);
-set(handles.Inlet_Liquid_Press,'String',2);
+set(handles.Inlet_Liquid_Press,'String',3.5);
 set(handles.Liquid_Mass_Flow,'String',480.2);
 set(handles.Tube_Diameter,'String',0.25);
 set(handles.Tube_Thickness,'String',0.035);
-set(handles.Long_Pitch_Ratio,'String',1.45);
-set(handles.Transverse_Pitch_Ratio,'String',1.256);
+set(handles.Long_Pitch_Ratio,'String',1.256);
+set(handles.Transverse_Pitch_Ratio,'String',1.45);
 set(handles.Liquid_Inlets,'String',4);
     case 'Test Bundle 1'
 set(handles.Gas_Type,'Value',1);
@@ -653,12 +653,12 @@ set(handles.Inlet_Gas_Temp,'String',418.6);
 set(handles.Inlet_Gas_Press,'String',18.76);
 set(handles.Gas_Mass_Flow,'String',418.5);
 set(handles.Inlet_Liquid_Temp,'String',700);
-set(handles.Inlet_Liquid_Press,'String',2);
+set(handles.Inlet_Liquid_Press,'String',3.5);
 set(handles.Liquid_Mass_Flow,'String',480.2);
 set(handles.Tube_Diameter,'String',0.25);
 set(handles.Tube_Thickness,'String',0.035);
-set(handles.Long_Pitch_Ratio,'String',1.45);
-set(handles.Transverse_Pitch_Ratio,'String',1.256);
+set(handles.Long_Pitch_Ratio,'String',1.256);
+set(handles.Transverse_Pitch_Ratio,'String',1.45);
 set(handles.Liquid_Inlets,'String',4);
     case 'Test Bundle 1'
 set(handles.Gas_Type,'Value',1);

@@ -3,11 +3,14 @@
 %see Solidworks model.
 %Andrew Greenop June 22, 2015
 clc;clear;
-load('THEEM_Input.mat');
+load('THEEM_Input_2D.mat');
 i=1;
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
-Q=zeros(loops*entry+spacers,108); %Establish grid size of system
-% Q=zeros(loops*entry,108); %Establish grid size of system
+if strcmp(model_selection,'Mockup 2.0')==1
+    [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder]=Mockup_2_geom(tube_material,D_out,t,ST,SL,entry,i);
+else
+    [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
+end
+Q=zeros(loops*entry+spacers,slice_total); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -26,7 +29,7 @@ m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are sp
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
 m_g_2_D=m_g/(bundles*section);
-m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
+m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume 
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -39,6 +42,10 @@ end
 BC_l=nnz(T_l); %Number of 'hot' coolant entry points into CTGH
 inlet_prop=1; %Determines which temperature heat properties are taken at for liquid and gas.
 T_l_out_old=zeros(size(T_l,1),size(T_l,2));
+gaps_position=zeros(1,spacers);
+for gap=1:spacers %Start the count for tie rod gaps
+    gaps_position(gap)=size(Q,1)-(vol_cells_gap-1)-(gap-1)*(1+vol_cells_gap);%Radial locations of volumes adjacent to tie rod gaps
+end
 while (1) %Starts process assuming constant heat transfer properties throughout system. Repeats using properties based on average temperature and pressure of volume cell.
 A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q));
 B=zeros(size(A,1),1);
@@ -50,7 +57,7 @@ for j_entry=1:round(size(Q,2)/entry):size(Q,2) %Equally distributes entry points
 while i>0
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
-        [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); 
+        [L,R_curv]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); 
          count_move=count_move+1;
          if j0>size(Q,2)
             j=j0-size(Q,2); %Resets j to 1 after full rotation around CTGH
@@ -63,11 +70,11 @@ while i>0
              j1=j+1; %j1 is the next grid space azimuthally from j
          end
          if count_move==round(size(Q,2)/entry)||j==size(T_l,2)-2 
-         i1=i-1; %Moves down a row when in line with an entry point
-         count_move=0; %Resets spacing from entry point
-            if i==size(Q,1)-3 || i==size(Q,1)-8
-                i1=i-2;
-            end
+            i1=i-1; %Moves down a row when in line with an entry point
+            count_move=0; %Resets spacing from entry point
+            if any(i==gaps_position)==1 %If at a volumes adjacent to tie rod gap
+                i1=i-2; %Skips over the tie rod gap
+            end            
          else
              i1=i;
          end
@@ -139,9 +146,9 @@ while i>0
        elseif T_g(i+1,j)==T_g_in
            A(count,g2)=0;
            B(count)=T_g(i+1,j)*UA/2;
-       end 
-       if i==size(T_g,1)-5||i==size(T_g,1)-10
-          if inlet_prop>1
+       end
+       if inlet_prop>1
+          if any(i+1==gaps_position)==1
             A(count,g1)=0;
             B(count)=T_mix*UA/2;
           end
@@ -180,7 +187,7 @@ while i>0
      end
 end
 end
-for i=[size(T_g,1)-5,size(T_g,1)-10]
+for i=gaps_position-1
     for j=1:size(T_g,2)
             g1=numel(T_l)+(i-1)*size(T_g,2)+j; %Placement of T_g(i,j) coefficient
             g2=numel(T_l)+(i)*size(T_g,2)+j; %Placement of T_g(i+1,j) coefficient
@@ -189,59 +196,86 @@ for i=[size(T_g,1)-5,size(T_g,1)-10]
             A(count,g1)=1;
             A(count,g2)=-1;
         elseif inlet_prop>1
-                if j>=5 && j<=13
-                    T_mix=mean(T_g(i,5:13));
+            %This section finds how large the tie rod gaps are azimuthally
+            %and gives their locations azimuthally.
+            if mod(slice_holder,2)==1 %If odd number of volume cells
+                gap_initial=(slice_holder+1)/2;
+            else %If even number of volume cells
+                gap_initial=slice_holder/2+1;
+            end
+            gap_count=1;
+            gap_matrix=zeros(slice_holder,slice_total/slice_holder);
+            for gap_index=gap_initial:slice_total+gap_initial-1
+            	if gap_index>slice_total
+                	gap_pos=gap_index-slice_total;
+                else
+                	gap_pos=gap_index;
+            	end
+                        gap_matrix(gap_count)=gap_pos;
+                        gap_count=gap_count+1;
+            end
+            %This loop finds the average 
+            for j_gap=1:size(gap_matrix,2)
+                if sum(gap_matrix(:,j_gap)==j)~=0 %If j is within the given range
+                    T_mix=mean(T_g(i,gap_matrix(:,j_gap)));
                     A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=14 && j<=22
-                    T_mix=mean(T_g(i,14:22));                    
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=23 && j<=31
-                    T_mix=mean(T_g(i,23:31));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=32 && j<=40
-                    T_mix=mean(T_g(i,32:40));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=41 && j<=49
-                    T_mix=mean(T_g(i,41:49));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=50 && j<=58
-                    T_mix=mean(T_g(i,50:58));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=59 && j<=67
-                    T_mix=mean(T_g(i,59:67));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=68 && j<=76
-                    T_mix=mean(T_g(i,68:76));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=77 && j<=85
-                    T_mix=mean(T_g(i,77:85));
-                    A(count,g2)=1;
-                    B(count)=T_mix; 
-                elseif j>=86 && j<=94
-                    T_mix=mean(T_g(i,86:94));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=95 && j<=103
-                    T_mix=mean(T_g(i,77:85));
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=1 && j<=4 
-                    T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
-                    A(count,g2)=1;
-                    B(count)=T_mix;
-                elseif j>=104 && j<=108
-                    T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
-                    A(count,g2)=1;
-                    B(count)=T_mix;
+                    B(count)=T_mix;  
+                    break
                 end
+            end
+%                 if j>=5 && j<=13
+%                     T_mix=mean(T_g(i,5:13));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=14 && j<=22
+%                     T_mix=mean(T_g(i,14:22));                    
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=23 && j<=31
+%                     T_mix=mean(T_g(i,23:31));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=32 && j<=40
+%                     T_mix=mean(T_g(i,32:40));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=41 && j<=49
+%                     T_mix=mean(T_g(i,41:49));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=50 && j<=58
+%                     T_mix=mean(T_g(i,50:58));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=59 && j<=67
+%                     T_mix=mean(T_g(i,59:67));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=68 && j<=76
+%                     T_mix=mean(T_g(i,68:76));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=77 && j<=85
+%                     T_mix=mean(T_g(i,77:85));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix; 
+%                 elseif j>=86 && j<=94
+%                     T_mix=mean(T_g(i,86:94));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=95 && j<=103
+%                     T_mix=mean(T_g(i,77:85));
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=1 && j<=4 
+%                     T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 elseif j>=104 && j<=108
+%                     T_mix=mean([T_g(i,104:108),T_g(i,1:4)]);
+%                     A(count,g2)=1;
+%                     B(count)=T_mix;
+%                 end
          end
     end
 end
@@ -323,5 +357,4 @@ e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',e1)
 CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
-save('THEEM_Output.mat');
-load('THEEM_Output.mat');
+save('2-D Model/THEEM_Output_2D.mat');

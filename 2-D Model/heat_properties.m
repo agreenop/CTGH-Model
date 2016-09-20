@@ -2,28 +2,26 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry)
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,~,P_g_in,T_g,T_l,P_g,~,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry)
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
     P_g_avg=P_g_in;
-    P_l_avg=P_l_in;
 else %Every other time, properties will be calculated at average temperatures and pressures for each volume.
     T_l_avg=(T_l(i1,j1)+T_l(i,j))/2;
     T_g_avg=(T_g(i,j)+T_g(i+1,j))/2;
     P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
-    P_l_avg=(P_l(i1,j1)+P_l(i,j))/2;
 end
 if isequal(model_selection,'Test Bundle 1')
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv]=Mockup1_geom(tube_material,D_out,t,i);
+[tubes_vol,~,N_L,~,D_in,L,H,k_t,~,~,R_curv]=Mockup1_geom(tube_material,D_out,t,i);
 else
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
+[L,R_curv,H,tubes_vol,~,N_L,~,D_in,k_t]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
 end
 switch liquid %Liquid properties depending on type of liquid
     case 'Fluoride Salt'
-        [mu_l,Cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flibe_prop(T_l_avg);
     case 'Water'
-        [mu_l,Cp_l,k_l,rho_l,nu_l,Pr_l] = Water_prop(T_l_avg);
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Water_prop(T_l_avg);
 end
 switch gas %Gas properties depending on type of gas
     case 'Air'
@@ -31,6 +29,9 @@ switch gas %Gas properties depending on type of gas
         [~,~,~,~,Pr_s]=Air_prop(T_l_avg,P_g_avg);
 end
 %This next part finds UA.
+if i==6
+    f=1;
+end
 Re_l=4*m_l_t/(pi*D_in*mu_l); %Reynolds number for liquid
 De_l=Re_l*sqrt(D_in/(2*R_curv)); %Dean number for liquid through a curved pipe
 Re_c=2300*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe
@@ -57,18 +58,14 @@ R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes
 u_app_g=m_g_vol/(rho_g*H*L); %Approach velocity of gas
 u_max_app=max((ST/(ST-1))*u_app_g,(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))*u_app_g); %Max velocity of gas/ velocity of gas between tubes
 Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocity
-if N_L==2
-    C2=0.76;
-elseif N_L==5
-    N_L_list=[1,2,3,4,5,7,10,13,16];
-    C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99];
-    tube_count=N_L*i;
+N_L_list=[1,2,3,4,5,7,10,13,16,20];
+C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99,1];
+tube_count=N_L*i;
     if tube_count<20
         C2=interp1(N_L_list,C2_list,tube_count);
     else
         C2=1;
     end
-end
 if Re_g<2*10^5
     if ST/SL <2
         m=0.60;
@@ -88,14 +85,5 @@ else
 end    
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient 
 R_g=1/(tubes_vol*pi*D_out*L*h_g); %Gas thermal resistance
-% if isequal(model_selection,'Test Bundle 1')
-%     sigma_SB=5.670367*10^-8; %W/(m^2*K^4)
-%     e_tube=0.28;
-%     e_surr=0.94;
-%     h_rad=sigma_SB*((T_l_avg+273.15)^2+(T_g_in+273.15)^2)*((T_l_avg+273.15)+(T_g_in+273.15))/((1/e_tube)+(1/e_surr)-1);
-%     R_rad=1/(tubes_vol*pi*D_out*L*h_rad);
-%     UA=1/(R_l+R_t+(R_g*R_rad)/(R_g+R_rad));
-% else
-    UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
-% end
+UA=1/(R_l+R_t+R_g); %Total UA for volume based on thermal resistances
 Area=tubes_vol*pi*D_out*L; %Outer surface area of tubes in volume

@@ -10,7 +10,7 @@
 % t=.035*.0254;
 %% Initialize the Excel Spreadsheet and assign static inputs
 clc;clear;
-delete('Optimization_Files/Optimization_Results.xlsx') %Delete previous results
+delete('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx') %Delete previous results
 %These inputs will not be changed by the optimization code:
 m_g=418.5;
 m_l=480.2;
@@ -134,10 +134,10 @@ if SL_max>SL_min %If SL_max>SL_min, chooses new parameters with same tube diamet
 end
 end
 end
-fname=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
+fname=sprintf('0-D Model & Optimization Program/Optimization_Files/Inputs/Input%d.mat',i);
 save(fname,'m_g','m_l','P_g_in','P_l_in','T_g_in','T_l_in','T_l_out','T_g_out','D_out','t','SL','ST','entry','row_num','tube_row');
 range_input=sprintf('A%d:H%d',i+1,i+1);
 A=[i,D_out/0.0254,t/0.0254,SL,ST,entry,row_num,tube_row];
-xlswrite('Optimization_Files/Optimization_Results.xlsx',A,range_input);
+xlswrite('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx',A,range_input);
 CTGH_0D_calculations(i)
 end
