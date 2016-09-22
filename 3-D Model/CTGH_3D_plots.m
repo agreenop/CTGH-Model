@@ -1,5 +1,5 @@
 clc;clear;
-load('THEEM_3D_Output.mat');
+load('THEEM_Output_3D.mat');
 %% Plot liquid manifold flow distribution
 figure(1)
 plot(X(2:n+1),entry*m_l_2_D(2:n+1)) %Individual port flow rates distribution over manifolds

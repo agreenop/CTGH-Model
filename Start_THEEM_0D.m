@@ -82,11 +82,10 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
-load('THEEM_Input_0D.mat');
 clc;clear;
-run('CTGH_0D.m')
 load('THEEM_Input_0D.mat');
-load('THEEM_Output_0D.mat');
+CTGH_0D(THEEM_model)
+
 
 
 % --- Executes on button press in New_button.
@@ -94,17 +93,15 @@ function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-varargout=CTGH_0D_GUI
+varargout=CTGH_0D_GUI;
 cancel='Cancel';
 if strcmp(varargout,cancel)==0    
-    load('THEEM_Input_0D.mat');
-    % handles.Cancel_program=program;
+%     handles.Cancel_program=program;
     guidata(hObject, handles);
     close(handles.figure1);
     clc;clear;
-    run('CTGH_0D.m')
     load('THEEM_Input_0D.mat');
-    load('THEEM_Output_0D.mat');
+    CTGH_0D(THEEM_model)
 end
 
 
@@ -135,5 +132,4 @@ if isequal(get(hObject, 'waitstatus'), 'waiting')
 else
     % The GUI is no longer waiting, just close it
     delete(hObject);
-    load('THEEM_Output_0D.mat');
 end

@@ -1,13 +1,6 @@
 % This program performs a sensitivity analysis on the CTGH 0-D code.  It
 % changes the geometry of the CTGH in order to minimize the necessary
 % effectiveness for the CTGH along with the salt and liquid pressure drops.
-%Default Values for Mk1 model:
-%These are the inputs that will change for the sensitivity analysis:
-% D_out=0.25*0.0254;
-% entry=4;
-% SL=1.45;
-% ST=1.256;
-% t=.035*.0254;
 %% Initialize the Excel Spreadsheet and assign static inputs
 clc;clear;
 delete('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx') %Delete previous results
@@ -20,6 +13,7 @@ T_g_in=418.6;
 T_l_in=700;
 T_l_out=600; %Liquid Outlet temperature [degC] 
 T_g_out=670; %Gas outlet temperature [degC]
+THEEM_model='Optimization';
 T={'Run','Outside Diameter [in]','Thickness [in]','Longitudinal Pitch',...
    'Transverse Pitch','Number of Inlets','Tube Layers per sub-bundle',...
    'Number of Tube per Layer per Manifold','Total Tubes',...
@@ -139,5 +133,5 @@ save(fname,'m_g','m_l','P_g_in','P_l_in','T_g_in','T_l_in','T_l_out','T_g_out','
 range_input=sprintf('A%d:H%d',i+1,i+1);
 A=[i,D_out/0.0254,t/0.0254,SL,ST,entry,row_num,tube_row];
 xlswrite('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx',A,range_input);
-CTGH_0D_calculations(i)
+CTGH_0D(THEEM_model,i)
 end

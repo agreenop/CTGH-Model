@@ -2,10 +2,10 @@
 %overall heat transfer, give a vertical temperature and pressure
 %distribution along the sub-bundles.
 clc;clear;
-load('THEEM_3D_Input.mat');
+load('THEEM_Input_3D.mat');
 %% Liquid Mass Flow Rate Distribution
-i=14; %Allows CTGH_Geom to start
-[tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops,spacers,section,bundles,L_tube_avg]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
+i=1; %Allows CTGH_Geom to start
+[L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_ci,R_co,vol_wid]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
 n=bundles*section; %Total number of vertical sections of CTGH
 alpha_press=0.5; %Manifold pressure recovery factor
 gamma_press=-0.25; %Manifold pressure recovery factor increment
@@ -49,40 +49,40 @@ end
 %% Gas Mass Flow Rate Distribution
 m_g_2_D=repmat(m_g/n,n+1,1);
 %% Run 2-D simulation and store matrix outputs
-% T_l_out_store=cell(n+1,1);
-% T_g_out_store=cell(n+1,1);
-% P_l_out_store=cell(n+1,1);
-% P_g_out_store=cell(n+1,1);
-% T_l_store=cell(n+1,1);
-% T_g_store=cell(n+1,1);
-% P_l_store=cell(n+1,1);
-% P_g_store=cell(n+1,1);
-% Q_store=cell(n+1,1);
-% epsilon_store=zeros(n+1,1);
-% U_store=zeros(n+1,1);
-% Area_store=zeros(n+1,1);
-% T_l_out_store{1}=0;
-% T_g_out_store{1}=0;
-% P_l_out_store{1}=0;
-% T_l_store{1}=0;
-% T_g_store{1}=0;
-% P_l_store{1}=0;
-% P_g_store{1}=0;
-% Q_store{1}=0;
-% for i=2:n+1
-%     [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D_calculations(m_l_2_D(i),m_g_2_D(i));
-%     T_l_out_store{i}=T_l_out;
-%     T_g_out_store{i}=T_g_out;
-%     P_l_out_store{i}=P_l_out;
-%     P_g_out_store{i}=P_g(size(P_g,1),:);
-%     T_l_store{i}=T_l;
-%     T_g_store{i}=T_g;
-%     P_l_store{i}=P_l;
-%     P_g_store{i}=P_g;
-%     Q_store{i}=Q;
-%     U_store(i)=U_avg;
-%     Area_store(i)=A_total;
-%     epsilon_store(i)=epsilon;
-% end
-save('THEEM_3D_Output.mat');
+T_l_out_store=cell(n+1,1);
+T_g_out_store=cell(n+1,1);
+P_l_out_store=cell(n+1,1);
+P_g_out_store=cell(n+1,1);
+T_l_store=cell(n+1,1);
+T_g_store=cell(n+1,1);
+P_l_store=cell(n+1,1);
+P_g_store=cell(n+1,1);
+Q_store=cell(n+1,1);
+epsilon_store=zeros(n+1,1);
+U_store=zeros(n+1,1);
+Area_store=zeros(n+1,1);
+T_l_out_store{1}=0;
+T_g_out_store{1}=0;
+P_l_out_store{1}=0;
+T_l_store{1}=0;
+T_g_store{1}=0;
+P_l_store{1}=0;
+P_g_store{1}=0;
+Q_store{1}=0;
+for i=2:n+1
+    [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i),m_g_2_D(i));
+    T_l_out_store{i}=T_l_out;
+    T_g_out_store{i}=T_g_out;
+    P_l_out_store{i}=P_l_out;
+    P_g_out_store{i}=P_g(size(P_g,1),:);
+    T_l_store{i}=T_l;
+    T_g_store{i}=T_g;
+    P_l_store{i}=P_l;
+    P_g_store{i}=P_g;
+    Q_store{i}=Q;
+    U_store(i)=U_avg;
+    Area_store(i)=A_total;
+    epsilon_store(i)=epsilon;
+end
+save('3-D Model/THEEM_Output_3D.mat');
 

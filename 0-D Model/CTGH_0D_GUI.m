@@ -128,7 +128,8 @@ SL=str2num(get(handles.Long_Pitch_Ratio,'String'));
 ST=str2num(get(handles.Transverse_Pitch_Ratio,'String'));
 entry=str2num(get(handles.Liquid_Inlets,'String'));
 handles.Cancel_program='Run';
-save('0-D Model/THEEM_Input_0D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry')
+THEEM_model='0D';
+save('0-D Model/THEEM_Input_0D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','THEEM_model')
 guidata(hObject, handles);
 close(handles.figure1); 
 

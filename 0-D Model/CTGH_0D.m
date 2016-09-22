@@ -1,9 +1,12 @@
 %This program will create a 0-D model of the Coiled Gas Tube Heater.  This
 %is based off the 0-D Excel Spreadsheet.  February 23,2016
-clc;clear;
-load('THEEM_Input_0D.mat');
-ST=1.45;
-SL=1.256;
+function CTGH_0D(THEEM_model,i)
+if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
+    load('THEEM_Input_0D.mat');
+else %Runs for optimization code.
+    fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
+    load(fname1);
+end
 T_l_out=600; %Liquid Outlet temperature [degC] 
 T_g_out=670; %Gas outlet temperature [degC]
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
@@ -15,7 +18,12 @@ LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in));
 Vol_flow_g=m_g/rho_g; %Volumetric flow rate of gas [m^3/s]
 
 %Average flibe properties
-[mu_l,cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);
+switch liquid
+    case 'Fluoride Salt'
+        [mu_l,cp_l,k_l,rho_l,nu_l,Pr_l] = Flibe_prop(T_l_avg);
+    case 'Sodium'
+        [mu_l,cp_l,k_l,rho_l,nu_l,Pr_l] = Sodium_prop(T_l_avg);
+end
 Vol_flow_l=m_l/rho_l; %Volumetric flow rate of liquid [m^3/s]
 
 %Metal (316 SS) properties
@@ -92,4 +100,13 @@ v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
 Re_l=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
 f_l=64/Re_l; %Salt friction factor (assuming laminar flow)
 deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]
-save('0-D Model/THEEM_Output_0D.mat');
+%% Save variables to output files for optimization
+if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
+    save('0-D Model/THEEM_Output_0D.mat');
+else %Runs for Optimization Code only
+    fname2=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
+    save(fname2,'tubes','D_curve_outer','H_bank','Area_surf','v_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
+    range_output=sprintf('I%d:T%d',i+1,i+1);
+    B=[tubes,D_curve_outer,H_bank,Area_surf,v_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
+    xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',B,range_output);
+end

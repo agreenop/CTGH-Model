@@ -1,23 +1,28 @@
 %This function establishes the geomtry of the CTGH bundle and of the control volume.  This function
 %will make it easy to redesign the geomerty if necessary.
-function [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i)
+function [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i)
 %% General CTGH Parameters
-loops=3; %Number of times tube loops around CTGH
-layer_num=40; %Number of tube layers per sub-bundle
-tube_layer=3; %Number of tubes per layer per manifold pipe
+if strcmp(THEEM_model, '3D')
+    load('THEEM_Input_3D.mat');
+else
+    load('THEEM_Input_2D.mat');
+end
+%loops=3; %Number of times tube loops around CTGH
+%layer_num=40; %Number of tube layers per sub-bundle
+%tube_layer=3; %Number of tubes per layer per manifold pipe
 heat_rod=1/2; %Number of heater rods in each tube layer (1 every 2 layer)
-bundles=36; %Number of sub-bundles in CTGH
-spacers=2; %Number of spacer gaps from tie rods in each sub-bundle (allows for air mixing)
-spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
-tube_holders=12; %Number of tube holders per sub-bundle
-R_ci=1.324/2; %Inside radius of coiled bundle [m]
+% bundles=36; %Number of sub-bundles in CTGH
+% spacers=2; %Number of spacer gaps from tie rods in each sub-bundle (allows for air mixing)
+% spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
+% tube_holders=12; %Number of tube holders per sub-bundle
+% R_ci=1.324/2; %Inside radius of coiled bundle [m]
 %% Calculated CTGH Geometry Parameters
 tubes_manifold=layer_num*(tube_layer-heat_rod); %Number of tubes per manifold per sub-bundle
 tubes=entry*tubes_manifold*bundles; %Total number of tubes in CTGH
 D_in=D_out-2*t; %Inside diameter [m]
 tube_col=entry*(tube_layer*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
 bank_depth=tube_col*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
-%R_co=R_ci+bank_depth; %Average tube bundle outside radius [m]
+R_co=R_ci+bank_depth; %Average tube bundle outside radius [m]
 R_c_avg=R_ci+0.5*bank_depth; %Radius to middle of tube bundle [m]
 L_tube_avg=loops*pi*2*R_c_avg; %Average length of each tube in bundle [m]
 vol_cells_gap=ceil(loops*entry/(spacers+1)); %Number of volume cells between each tie rod gap

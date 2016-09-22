@@ -131,7 +131,8 @@ model_index=get(handles.Model_Selection,'Value');
 model_list=get(handles.Model_Selection,'String');
 model_selection=char(model_list(model_index));
 handles.Cancel_program='Run';
-save('THEEM_3D_Input.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection')
+THEEM_model='3D';
+save('3-D Model/THEEM_Input_3D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection','THEEM_model')
 guidata(hObject, handles);
 close(handles.figure1); 
 

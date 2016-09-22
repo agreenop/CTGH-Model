@@ -2,7 +2,7 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,~,P_g_in,T_g,T_l,P_g,~,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry)
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model)
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
@@ -15,7 +15,7 @@ end
 if isequal(model_selection,'Test Bundle 1')
 [tubes_vol,~,N_L,~,D_in,L,H,k_t,~,~,R_curv]=Mockup1_geom(tube_material,D_out,t,i);
 else
-[L,R_curv,H,tubes_vol,~,N_L,~,D_in,k_t]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
+[L,R_curv,H,tubes_vol,~,N_L,~,D_in,k_t]=CTGH_geom(THEEM_model,i);
 end
 switch liquid %Liquid properties depending on type of liquid
     case 'Fluoride Salt'
@@ -29,9 +29,6 @@ switch gas %Gas properties depending on type of gas
         [~,~,~,~,Pr_s]=Air_prop(T_l_avg,P_g_avg);
 end
 %This next part finds UA.
-if i==6
-    f=1;
-end
 Re_l=4*m_l_t/(pi*D_in*mu_l); %Reynolds number for liquid
 De_l=Re_l*sqrt(D_in/(2*R_curv)); %Dean number for liquid through a curved pipe
 Re_c=2300*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe

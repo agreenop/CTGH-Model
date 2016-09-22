@@ -2,14 +2,14 @@
 %assuming the gas is only flowing in the radial direction.  For grid layout,
 %see Solidworks model.
 %Andrew Greenop June 22, 2015
-clc;clear;
-load('THEEM_Input_2D.mat');
-i=1;
-if strcmp(model_selection,'Mockup 2.0')==1
-    [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder]=Mockup_2_geom(tube_material,D_out,t,ST,SL,entry,i);
+function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D_exact,m_g_2_D_exact)
+if strcmp(THEEM_model, '3D')
+    load('THEEM_Input_3D.mat');
 else
-    [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); %Establishes geometry and material of tubes
+    load('THEEM_Input_2D.mat');
 end
+i=1;
+[L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i); %Establishes geometry and material of tubes
 Q=zeros(loops*entry+spacers,slice_total); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
@@ -25,11 +25,16 @@ Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
-m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
-m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
+if strcmp(THEEM_model, '3D') %For 3-D calculations, calculates for each bundle
+    m_l_2_D=m_l_2_D_exact; %Mass flow split between 36 bundles, which are split into 4 each
+    m_g_2_D=m_g_2_D_exact;
+else % For 2-D calculations, averages flow rates across bundles
+    m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
+    m_g_2_D=m_g/(bundles*section);
+end
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
-m_g_2_D=m_g/(bundles*section);
-m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume 
+m_l_t=m_l_vol/(tubes_vol); %Mass flow of coolant per tube assuming even distribution
+m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -57,7 +62,7 @@ for j_entry=1:round(size(Q,2)/entry):size(Q,2) %Equally distributes entry points
 while i>0
     for j0=j_entry:size(Q,2)+j_entry-1
 %This section allows for the spiral motion of the CTGH
-        [L,R_curv]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i); 
+        [L,R_curv]=CTGH_geom(THEEM_model,i); 
          count_move=count_move+1;
          if j0>size(Q,2)
             j=j0-size(Q,2); %Resets j to 1 after full rotation around CTGH
@@ -89,7 +94,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry);
+       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -291,7 +296,7 @@ i1=1;
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry);
+                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
                 chi=1.15;
                 f=0.2;
                 P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
@@ -341,20 +346,23 @@ for entry_number=1:size(T_l_out,1)
     P_l_out(entry_number,1)=P_l(1,T_l_out(entry_number,1)); %Records outlet pressure of each loop
     T_l_out(entry_number,1)=T_l(1,T_l_out(entry_number,1)); %Records outlet temperature of each loop
 end
-T_g_avg_out=mean(T_g(size(T_g,1),:)); %Average gas outlet temperature
+T_g_out=T_g(size(T_g,1),:); %Records outlet gas temperatures around the bundle
+T_g_avg_out=mean(T_g_out); %Average gas outlet temperature
 T_g_avg_total=(T_g_avg_out+T_g_in)/2; %Average gas temperature across CTGH
-T_l_avg_out=mean(T_l_out); %Avergae liquid outlet temperature
+T_l_avg_out=mean(T_l_out); %Average liquid outlet temperature
 T_l_avg_total=(T_l_avg_out+T_l_in)/2; %Average liquid temperature across CTGH
 UA_total=U_avg*A_total;
 LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_avg_out-T_g_in));
 Q_m=UA_total*LMTD;
 inlet_prop=1;
 i=1;
-[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g,i,j,i1,j1,m_l_t,model_selection,entry);
+[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
 C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
 Q_max=C_min*(T_l_in-T_g_in);
 e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
-fprintf('The effectiveness of this heat exchanger is %4.4f.\n',e1)
-CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
-save('2-D Model/THEEM_Output_2D.mat');
+if strcmp(THEEM_model, '2D')
+    fprintf('The effectiveness of this heat exchanger is %4.4f.\n',e1)
+    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,R_co,vol_wid) %Plots the values
+    save('2-D Model/THEEM_Output_2D.mat');
+end

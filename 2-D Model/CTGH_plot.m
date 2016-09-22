@@ -1,8 +1,8 @@
 %This function will map the temperatures, pressures, and heat transfer
 %outputs for the liquid coolant and gas medium for the CTGH.
-function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid)
+function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,R_co,vol_wid)
 %Plot liquid coolant temperatures
-rho=10:size(T_l,1)+9;
+rho=R_ci:vol_wid:R_co-vol_wid;
 theta = linspace(90,-270,size(T_l,2))*pi/180;
 [th, r] = meshgrid(theta, rho);
 figure(1)

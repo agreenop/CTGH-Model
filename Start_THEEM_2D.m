@@ -80,19 +80,17 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % handles.Cancel_program='Run';
+load('THEEM_Input_2D.mat');
 guidata(hObject, handles);
 close(handles.figure1); 
-load('THEEM_Input_2D.mat');
 if isequal(model_selection,'Test Bundle 1')
     clc;clear;
-    run('Mockup1_2D.m')
     load('THEEM_Input_2D.mat');
-    load('THEEM_Output_2D.mat');
+    run('Mockup1_2D.m')
 else
     clc;clear;
-    run('CTGH_2D.m')
     load('THEEM_Input_2D.mat');
-    load('THEEM_Output_2D.mat');
+    CTGH_2D(THEEM_model);
 end
 
 % --- Executes on button press in New_button.
@@ -109,14 +107,12 @@ guidata(hObject, handles);
 close(handles.figure1);
 if isequal(model_selection,'Test Bundle 1')
     clc;clear;
-    run('Mockup1_2D.m')
     load('THEEM_Input_2D.mat');
-    load('THEEM_Output_2D.mat');
+    run('Mockup1_2D.m')
 else
     clc;clear;
-    run('CTGH_2D.m')
     load('THEEM_Input_2D.mat');
-    load('THEEM_Output_2D.mat');
+    CTGH_2D(THEEM_model);
 end
 end
 
@@ -148,5 +144,4 @@ if isequal(get(hObject, 'waitstatus'), 'waiting')
 else
     % The GUI is no longer waiting, just close it
     delete(hObject);
-    load('THEEM_Output_2D.mat');
 end

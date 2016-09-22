@@ -22,7 +22,7 @@ function varargout = CTGH_2D_GUI(varargin)
 
 % Edit the above text to modify the response to help CTGH_2D_GUI
 
-% Last Modified by GUIDE v2.5 18-Jan-2016 14:45:00
+% Last Modified by GUIDE v2.5 21-Sep-2016 16:26:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -130,8 +130,49 @@ entry=str2num(get(handles.Liquid_Inlets,'String'));
 model_index=get(handles.Model_Selection,'Value');
 model_list=get(handles.Model_Selection,'String');
 model_selection=char(model_list(model_index));
+loops=str2num(get(handles.Loops,'String'));
+tube_layer=str2num(get(handles.tube_layer,'String'));
+layer_num=str2num(get(handles.layer_num,'String'));
+bundles=str2num(get(handles.bundles,'String'));
+spacers=str2num(get(handles.spacers,'String'));
+gap_width_index=get(handles.Gap_Units,'Value');
+gap_units_list=get(handles.Gap_Units,'String');
+gap_units=char(gap_units_list(gap_width_index));
+spacer_width=str2num(get(handles.spacer_width,'String'));
+switch gap_units
+    case 'in'
+        spacer_width=spacer_width*0.0254;
+    case 'ft'
+         spacer_width=spacer_width*0.0254/12;
+    case 'mm'
+         spacer_width=spacer_width*1000;
+    case 'cm'
+         spacer_width=spacer_width*100;
+    case 'm'
+         spacer_width=spacer_width;
+end
+tube_holders=str2num(get(handles.tube_holders,'String'));
+bundle_radius_index=get(handles.Gap_Units,'Value');
+bundle_radius_units_list=get(handles.Gap_Units,'String');
+radius_units=char(bundle_radius_units_list(bundle_radius_index));
+R_ci=str2num(get(handles.Bundle_Radius,'String'));
+switch radius_units
+    case 'in'
+        R_ci=R_ci*0.0254;
+    case 'ft'
+         R_ci=R_ci*0.0254/12;
+    case 'mm'
+         R_ci=R_ci*1000;
+    case 'cm'
+         R_ci=R_ci*100;
+    case 'm'
+         R_ci=R_ci;
+end
 handles.Cancel_program='Run';
-save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in','m_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection')
+THEEM_model='2D';
+save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in',...
+    'm_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection','THEEM_model','loops',...
+    'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders','R_ci')
 guidata(hObject, handles);
 close(handles.figure1); 
 
@@ -352,6 +393,16 @@ set(handles.Tube_Thickness,'String',0.035);
 set(handles.Long_Pitch_Ratio,'String',1.256);
 set(handles.Transverse_Pitch_Ratio,'String',1.45);
 set(handles.Liquid_Inlets,'String',4);
+set(handles.Loops,'String',3);
+set(handles.tube_layer,'String',3);
+set(handles.layer_num,'String',40);
+set(handles.bundles,'String',36);
+set(handles.spacers,'String',2);
+set(handles.spacer_width,'String',0.038);
+set(handles.Gap_Units,'Value',1);
+set(handles.tube_holders,'String',12);
+set(handles.Bundle_Radius,'String',0.662);
+set(handles.Bundle_Radius_Units,'Value',1);
     case 'Test Bundle 1'
 set(handles.Gas_Type,'Value',1);
 set(handles.Liquid_Type,'Value',2);
@@ -369,6 +420,16 @@ set(handles.Tube_Thickness,'String',0.002);
 set(handles.Long_Pitch_Ratio,'String',1.37);
 set(handles.Transverse_Pitch_Ratio,'String',1.67);
 set(handles.Liquid_Inlets,'String',2);
+set(handles.Loops,'String',4);
+set(handles.tube_layer,'String',2);
+set(handles.layer_num,'String',20);
+set(handles.bundles,'String',1);
+set(handles.spacers,'String',0);
+set(handles.spacer_width,'String',0);
+set(handles.Gap_Units,'Value',1);
+set(handles.tube_holders,'String',6);
+set(handles.Bundle_Radius,'String',17);
+set(handles.Bundle_Radius_Units,'Value',4);
 end
 
 % --- Executes on button press in Cancel.
@@ -660,6 +721,16 @@ set(handles.Tube_Thickness,'String',0.035);
 set(handles.Long_Pitch_Ratio,'String',1.256);
 set(handles.Transverse_Pitch_Ratio,'String',1.45);
 set(handles.Liquid_Inlets,'String',4);
+set(handles.Loops,'String',3);
+set(handles.tube_layer,'String',3);
+set(handles.layer_num,'String',40);
+set(handles.bundles,'String',36);
+set(handles.spacers,'String',2);
+set(handles.spacer_width,'String',0.038);
+set(handles.Gap_Units,'Value',1);
+set(handles.tube_holders,'String',12);
+set(handles.Bundle_Radius,'String',0.662);
+set(handles.Bundle_Radius_Units,'Value',1);
     case 'Test Bundle 1'
 set(handles.Gas_Type,'Value',1);
 set(handles.Liquid_Type,'Value',2);
@@ -677,6 +748,16 @@ set(handles.Tube_Thickness,'String',0.02);
 set(handles.Long_Pitch_Ratio,'String',1.37);
 set(handles.Transverse_Pitch_Ratio,'String',1.67);
 set(handles.Liquid_Inlets,'String',2);
+set(handles.Loops,'String',4);
+set(handles.tube_layer,'String',2);
+set(handles.layer_num,'String',20);
+set(handles.bundles,'String',1);
+set(handles.spacers,'String',0);
+set(handles.spacer_width,'String',0);
+set(handles.Gap_Units,'Value',1);
+set(handles.tube_holders,'String',6);
+set(handles.Bundle_Radius,'String',17);
+set(handles.Bundle_Radius_Units,'Value',4);
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns Model_Selection contents as cell array
@@ -686,6 +767,236 @@ end
 % --- Executes during object creation, after setting all properties.
 function Model_Selection_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to Model_Selection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Loops_Callback(hObject, eventdata, handles)
+% hObject    handle to Loops (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Loops as text
+%        str2double(get(hObject,'String')) returns contents of Loops as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Loops_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Loops (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function tube_layer_Callback(hObject, eventdata, handles)
+% hObject    handle to tube_layer (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tube_layer as text
+%        str2double(get(hObject,'String')) returns contents of tube_layer as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tube_layer_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tube_layer (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function layer_num_Callback(hObject, eventdata, handles)
+% hObject    handle to layer_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of layer_num as text
+%        str2double(get(hObject,'String')) returns contents of layer_num as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function layer_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to layer_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function bundles_Callback(hObject, eventdata, handles)
+% hObject    handle to bundles (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of bundles as text
+%        str2double(get(hObject,'String')) returns contents of bundles as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function bundles_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bundles (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function spacers_Callback(hObject, eventdata, handles)
+% hObject    handle to spacers (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of spacers as text
+%        str2double(get(hObject,'String')) returns contents of spacers as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function spacers_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to spacers (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function spacer_width_Callback(hObject, eventdata, handles)
+% hObject    handle to spacer_width (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of spacer_width as text
+%        str2double(get(hObject,'String')) returns contents of spacer_width as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function spacer_width_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to spacer_width (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function tube_holders_Callback(hObject, eventdata, handles)
+% hObject    handle to tube_holders (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tube_holders as text
+%        str2double(get(hObject,'String')) returns contents of tube_holders as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tube_holders_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tube_holders (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Bundle_Radius_Callback(hObject, eventdata, handles)
+% hObject    handle to Bundle_Radius (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Bundle_Radius as text
+%        str2double(get(hObject,'String')) returns contents of Bundle_Radius as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Bundle_Radius_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Bundle_Radius (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in Gap_Units.
+function Gap_Units_Callback(hObject, eventdata, handles)
+% hObject    handle to Gap_Units (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns Gap_Units contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from Gap_Units
+
+
+% --- Executes during object creation, after setting all properties.
+function Gap_Units_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Gap_Units (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in Bundle_Radius_Units.
+function Bundle_Radius_Units_Callback(hObject, eventdata, handles)
+% hObject    handle to Bundle_Radius_Units (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns Bundle_Radius_Units contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from Bundle_Radius_Units
+
+
+% --- Executes during object creation, after setting all properties.
+function Bundle_Radius_Units_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Bundle_Radius_Units (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

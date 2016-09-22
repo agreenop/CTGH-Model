@@ -82,41 +82,25 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
-load('THEEM_3D_Input.mat');
-if isequal(model_selection,'Test Bundle 1')
-    clc;clear;
-    run('Mockup1_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
-else
-    clc;clear;
-    run('CTGH_3D.m')
-    load('THEEM_3D_Input.mat');
-    load('THEEM_3D_Output.mat');
-end
+clc;clear;
+run('CTGH_3D.m')
+
+
 
 % --- Executes on button press in New_button.
 function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-CTGH_Input_GUI;
-load('THEEM_3D_Input.mat');
-% handles.Cancel_program=program;
-guidata(hObject, handles);
-close(handles.figure1);
-if isequal(model_selection,'Test Bundle 1')
-    clc;clear;
-    run('Mockup1_2D.m')
-    load('THEEM_Input.mat');
-    load('THEEM_Output.mat');
-else
+varargout = CTGH_Input_GUI
+cancel='Cancel';
+if strcmp(varargout,cancel)==0 ;
+    % handles.Cancel_program=program;
+    guidata(hObject, handles);
+    close(handles.figure1);
     clc;clear;
     run('CTGH_3D.m')
-    load('THEEM_3D_Input.mat');
-    load('THEEM_3D_Output.mat');
 end
-
 
 
 
@@ -145,5 +129,4 @@ if isequal(get(hObject, 'waitstatus'), 'waiting')
 else
     % The GUI is no longer waiting, just close it
     delete(hObject);
-    load('THEEM_Output.mat');
 end
