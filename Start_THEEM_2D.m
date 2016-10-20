@@ -98,22 +98,21 @@ function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-varargout=CTGH_2D_GUI
+varargout=CTGH_2D_GUI;
 cancel='Cancel';
 if strcmp(varargout,cancel)==0    
     load('THEEM_Input_2D.mat');
-% handles.Cancel_program=program;
-guidata(hObject, handles);
-close(handles.figure1);
-if isequal(model_selection,'Test Bundle 1')
-    clc;clear;
-    load('THEEM_Input_2D.mat');
-    run('Mockup1_2D.m')
-else
-    clc;clear;
-    load('THEEM_Input_2D.mat');
-    CTGH_2D(THEEM_model);
-end
+    guidata(hObject, handles);
+    close(handles.figure1);
+    if isequal(model_selection,'Test Bundle 1')
+        clc;clear;
+        load('THEEM_Input_Mockup.mat');
+        run('Mockup1_2D.m')
+    else
+        clc;clear;
+        load('THEEM_Input_2D.mat');
+        CTGH_2D(THEEM_model);
+    end
 end
 
 

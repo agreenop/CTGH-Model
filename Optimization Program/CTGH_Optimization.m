@@ -5,6 +5,7 @@
 clc;clear;
 delete('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx') %Delete previous results
 %These inputs will not be changed by the optimization code:
+load('THEEM_Input_Optimization.mat');
 m_g=418.5;
 m_l=480.2;
 P_g_in=18.76;

@@ -2,7 +2,7 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model)
+function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection)
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
@@ -22,6 +22,8 @@ switch liquid %Liquid properties depending on type of liquid
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flibe_prop(T_l_avg);
     case 'Water'
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Water_prop(T_l_avg);
+    case 'Drakesol 260AT'
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Drakesol_260AT_prop(T_l_avg);
 end
 switch gas %Gas properties depending on type of gas
     case 'Air'
@@ -57,7 +59,7 @@ u_max_app=max((ST/(ST-1))*u_app_g,(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))*u_app_g); %Ma
 Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocity
 N_L_list=[1,2,3,4,5,7,10,13,16,20];
 C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99,1];
-tube_count=N_L*i;
+tube_count=2*N_L*i;
     if tube_count<20
         C2=interp1(N_L_list,C2_list,tube_count);
     else

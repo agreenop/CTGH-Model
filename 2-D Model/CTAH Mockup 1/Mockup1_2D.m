@@ -2,10 +2,10 @@
 %mock-up test bundle created as an undergrad project.  This program was
 %tailored specifically for that model.
 clc;clear;
-load('THEEM_Input.mat');
+load('THEEM_Input_Mockup.mat');
 i=1;
 [tubes_vol,N_T,N_L,tubes,D_in,L,H,k_t,rho_t,Cp_t,R_curv,loops]=Mockup1_geom(tube_material,D_out,t,i); %Establishes geometry and material of tubes
-Q=zeros(loops*entry,50); %Establish grid size of system
+Q=zeros(loops*entry,108); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
 P_g=zeros(size(T_g));
@@ -23,7 +23,7 @@ m_l_2_D=m_l; %The test-bundle is calculated in 1 layer
 m_l_t=m_l/tubes; %Mass flow of coolant per tube assuming even distribution
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
 m_g_2_D=m_g; %The test-bundle is calculated in 1 layer
-m_g_vol=m_g_2_D/(50); %Mass flow of gas per volume 
+m_g_vol=m_g_2_D/(108); %Mass flow of gas per volume 
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -76,7 +76,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j+1)-T_l(i,j))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,~,rho_l,~,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry);
+       [UA,Cp_l,Cp_g,~,rho_l,~,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -178,7 +178,7 @@ i1=1;
          for j=1:size(P_g,2)
           if P_g(i+1,j)~=P_g_in  
               %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-            [~,~,~,~,~,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_l_in,P_g_in,T_g,T_l,P_g,P_l,m_g_vol,i,j,i1,j1,m_l_t,model_selection,entry);
+            [~,~,~,~,~,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection);
             chi=1.15;
             f=0.2;
             P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5; 
@@ -240,5 +240,4 @@ Q_m=UA_total*LMTD;
 epsilon=Q_actual/Q_m;
 fprintf('The effectiveness of this heat exchanger is %4.4f.\n',epsilon)
 Mockup1_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid) %Plots the values
-save('THEEM_Output.mat');
-load('THEEM_Output.mat');
+save('2-D Model/CTAH Mockup 1/THEEM_Output_Mockup.mat');

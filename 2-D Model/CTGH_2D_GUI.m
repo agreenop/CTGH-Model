@@ -22,7 +22,7 @@ function varargout = CTGH_2D_GUI(varargin)
 
 % Edit the above text to modify the response to help CTGH_2D_GUI
 
-% Last Modified by GUIDE v2.5 21-Sep-2016 16:26:24
+% Last Modified by GUIDE v2.5 11-Oct-2016 16:28:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -103,9 +103,9 @@ switch diameter_units
     case 'ft'
          D_out=D_out*0.0254/12;
     case 'mm'
-         D_out=D_out*1000;
+         D_out=D_out/1000;
     case 'cm'
-         D_out=D_out*100;
+         D_out=D_out/100;
     case 'm'
          D_out=D_out;
 end
@@ -118,9 +118,9 @@ switch thick_units
     case 'ft'
          t=t*0.0254/12;
     case 'mm'
-         t=t*1000;
+         t=t/1000;
     case 'cm'
-         t=t*100;
+         t=t/100;
     case 'm'
         t=t;
 end
@@ -145,15 +145,15 @@ switch gap_units
     case 'ft'
          spacer_width=spacer_width*0.0254/12;
     case 'mm'
-         spacer_width=spacer_width*1000;
+         spacer_width=spacer_width/1000;
     case 'cm'
-         spacer_width=spacer_width*100;
+         spacer_width=spacer_width/100;
     case 'm'
          spacer_width=spacer_width;
 end
 tube_holders=str2num(get(handles.tube_holders,'String'));
-bundle_radius_index=get(handles.Gap_Units,'Value');
-bundle_radius_units_list=get(handles.Gap_Units,'String');
+bundle_radius_index=get(handles.Bundle_Radius_Units,'Value');
+bundle_radius_units_list=get(handles.Bundle_Radius_Units,'String');
 radius_units=char(bundle_radius_units_list(bundle_radius_index));
 R_ci=str2num(get(handles.Bundle_Radius,'String'));
 switch radius_units
@@ -162,17 +162,20 @@ switch radius_units
     case 'ft'
          R_ci=R_ci*0.0254/12;
     case 'mm'
-         R_ci=R_ci*1000;
+         R_ci=R_ci/1000;
     case 'cm'
-         R_ci=R_ci*100;
+         R_ci=R_ci/100;
     case 'm'
          R_ci=R_ci;
 end
+tube_slope=str2num(get(handles.tube_slope,'String'));
+heat_rod=str2num(get(handles.heat_rod,'String'));
 handles.Cancel_program='Run';
 THEEM_model='2D';
 save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in',...
-    'm_g','m_l','tube_material','D_out','t','SL','ST','entry','model_selection','THEEM_model','loops',...
-    'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders','R_ci')
+    'm_g','m_l','tube_material','D_out','t','SL','ST','entry','THEEM_model','loops',...
+    'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders',...
+    'R_ci','tube_slope','heat_rod','model_selection')
 guidata(hObject, handles);
 close(handles.figure1); 
 
@@ -377,59 +380,92 @@ model_list=get(handles.Model_Selection,'String');
 Model_Selection=char(model_list(model_index));
 switch Model_Selection
     case 'Mk1 CTGH'
-set(handles.Gas_Type,'Value',1);
-set(handles.Liquid_Type,'Value',1);
-set(handles.Tube_Material,'Value',1);
-set(handles.Diameter_Units,'Value',1);
-set(handles.Thickness_Units,'Value',1);
-set(handles.Inlet_Gas_Temp,'String',418.6);
-set(handles.Inlet_Gas_Press,'String',18.76);
-set(handles.Gas_Mass_Flow,'String',418.5);
-set(handles.Inlet_Liquid_Temp,'String',700);
-set(handles.Inlet_Liquid_Press,'String',3.5);
-set(handles.Liquid_Mass_Flow,'String',480.2);
-set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.035);
-set(handles.Long_Pitch_Ratio,'String',1.256);
-set(handles.Transverse_Pitch_Ratio,'String',1.45);
-set(handles.Liquid_Inlets,'String',4);
-set(handles.Loops,'String',3);
-set(handles.tube_layer,'String',3);
-set(handles.layer_num,'String',40);
-set(handles.bundles,'String',36);
-set(handles.spacers,'String',2);
-set(handles.spacer_width,'String',0.038);
-set(handles.Gap_Units,'Value',1);
-set(handles.tube_holders,'String',12);
-set(handles.Bundle_Radius,'String',0.662);
-set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',1);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',418.6);
+        set(handles.Inlet_Gas_Press,'String',18.76);
+        set(handles.Gas_Mass_Flow,'String',418.5);
+        set(handles.Inlet_Liquid_Temp,'String',700);
+        set(handles.Inlet_Liquid_Press,'String',3.5);
+        set(handles.Liquid_Mass_Flow,'String',480.2);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.035);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',4);
+        set(handles.Loops,'String',3);
+        set(handles.tube_layer,'String',3);
+        set(handles.layer_num,'String',40);
+        set(handles.bundles,'String',36);
+        set(handles.spacers,'String',2);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',12);
+        set(handles.Bundle_Radius,'String',0.662);
+        set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.tube_slope,'String',0.003);
+        set(handles.heat_rod,'String',1/2);
     case 'Test Bundle 1'
-set(handles.Gas_Type,'Value',1);
-set(handles.Liquid_Type,'Value',2);
-set(handles.Tube_Material,'Value',1);
-set(handles.Diameter_Units,'Value',1);
-set(handles.Thickness_Units,'Value',1);
-set(handles.Inlet_Gas_Temp,'String',23.7);
-set(handles.Inlet_Gas_Press,'String',1);
-set(handles.Gas_Mass_Flow,'String',.34);
-set(handles.Inlet_Liquid_Temp,'String',49.7);
-set(handles.Inlet_Liquid_Press,'String',2);
-set(handles.Liquid_Mass_Flow,'String',0.2);
-set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.002);
-set(handles.Long_Pitch_Ratio,'String',1.37);
-set(handles.Transverse_Pitch_Ratio,'String',1.67);
-set(handles.Liquid_Inlets,'String',2);
-set(handles.Loops,'String',4);
-set(handles.tube_layer,'String',2);
-set(handles.layer_num,'String',20);
-set(handles.bundles,'String',1);
-set(handles.spacers,'String',0);
-set(handles.spacer_width,'String',0);
-set(handles.Gap_Units,'Value',1);
-set(handles.tube_holders,'String',6);
-set(handles.Bundle_Radius,'String',17);
-set(handles.Bundle_Radius_Units,'Value',4);
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',2);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',23.7);
+        set(handles.Inlet_Gas_Press,'String',1);
+        set(handles.Gas_Mass_Flow,'String',.34);
+        set(handles.Inlet_Liquid_Temp,'String',49.7);
+        set(handles.Inlet_Liquid_Press,'String',2);
+        set(handles.Liquid_Mass_Flow,'String',0.2);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.02);
+        set(handles.Long_Pitch_Ratio,'String',1.37);
+        set(handles.Transverse_Pitch_Ratio,'String',1.67);
+        set(handles.Liquid_Inlets,'String',2);
+        set(handles.Loops,'String',4);
+        set(handles.tube_layer,'String',1);
+        set(handles.layer_num,'String',20);
+        set(handles.bundles,'String',1);
+        set(handles.spacers,'String',0);
+        set(handles.spacer_width,'String',0);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',6);
+        set(handles.Bundle_Radius,'String',8.75);
+        set(handles.Bundle_Radius_Units,'Value',4);
+        set(handles.tube_slope,'String',0);
+        set(handles.heat_rod,'String',0);
+    case 'Mockup 2.0'
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',2);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',25);
+        set(handles.Inlet_Gas_Press,'String',1);
+        set(handles.Gas_Mass_Flow,'String',0.649);
+        set(handles.Inlet_Liquid_Temp,'String',80);
+        set(handles.Inlet_Liquid_Press,'String',2);
+        set(handles.Liquid_Mass_Flow,'String',0.1);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.02);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',2);
+        set(handles.Loops,'String',3);
+        set(handles.tube_layer,'String',2);
+        set(handles.layer_num,'String',10);
+        set(handles.bundles,'String',1);
+        set(handles.spacers,'String',1);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',6);
+        set(handles.Bundle_Radius,'String',25);
+        set(handles.Bundle_Radius_Units,'Value',2);
+        set(handles.tube_slope,'String',0);
+        set(handles.heat_rod,'String',0);
 end
 
 % --- Executes on button press in Cancel.
@@ -702,62 +738,95 @@ function Model_Selection_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 model_index=get(handles.Model_Selection,'Value');
 model_list=get(handles.Model_Selection,'String');
-Model_Selection=char(model_list(model_index));
-switch Model_Selection
+model_selection=char(model_list(model_index));
+switch model_selection
     case 'Mk1 CTGH'
-set(handles.Gas_Type,'Value',1);
-set(handles.Liquid_Type,'Value',1);
-set(handles.Tube_Material,'Value',1);
-set(handles.Diameter_Units,'Value',1);
-set(handles.Thickness_Units,'Value',1);
-set(handles.Inlet_Gas_Temp,'String',418.6);
-set(handles.Inlet_Gas_Press,'String',18.76);
-set(handles.Gas_Mass_Flow,'String',418.5);
-set(handles.Inlet_Liquid_Temp,'String',700);
-set(handles.Inlet_Liquid_Press,'String',3.5);
-set(handles.Liquid_Mass_Flow,'String',480.2);
-set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.035);
-set(handles.Long_Pitch_Ratio,'String',1.256);
-set(handles.Transverse_Pitch_Ratio,'String',1.45);
-set(handles.Liquid_Inlets,'String',4);
-set(handles.Loops,'String',3);
-set(handles.tube_layer,'String',3);
-set(handles.layer_num,'String',40);
-set(handles.bundles,'String',36);
-set(handles.spacers,'String',2);
-set(handles.spacer_width,'String',0.038);
-set(handles.Gap_Units,'Value',1);
-set(handles.tube_holders,'String',12);
-set(handles.Bundle_Radius,'String',0.662);
-set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',1);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',418.6);
+        set(handles.Inlet_Gas_Press,'String',18.76);
+        set(handles.Gas_Mass_Flow,'String',418.5);
+        set(handles.Inlet_Liquid_Temp,'String',700);
+        set(handles.Inlet_Liquid_Press,'String',3.5);
+        set(handles.Liquid_Mass_Flow,'String',480.2);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.035);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',4);
+        set(handles.Loops,'String',3);
+        set(handles.tube_layer,'String',3);
+        set(handles.layer_num,'String',40);
+        set(handles.bundles,'String',36);
+        set(handles.spacers,'String',2);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',12);
+        set(handles.Bundle_Radius,'String',0.662);
+        set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.tube_slope,'String',0.003);
+        set(handles.heat_rod,'String',1/2);        
     case 'Test Bundle 1'
-set(handles.Gas_Type,'Value',1);
-set(handles.Liquid_Type,'Value',2);
-set(handles.Tube_Material,'Value',1);
-set(handles.Diameter_Units,'Value',1);
-set(handles.Thickness_Units,'Value',1);
-set(handles.Inlet_Gas_Temp,'String',23.7);
-set(handles.Inlet_Gas_Press,'String',1);
-set(handles.Gas_Mass_Flow,'String',.34);
-set(handles.Inlet_Liquid_Temp,'String',49.7);
-set(handles.Inlet_Liquid_Press,'String',2);
-set(handles.Liquid_Mass_Flow,'String',0.2);
-set(handles.Tube_Diameter,'String',0.25);
-set(handles.Tube_Thickness,'String',0.02);
-set(handles.Long_Pitch_Ratio,'String',1.37);
-set(handles.Transverse_Pitch_Ratio,'String',1.67);
-set(handles.Liquid_Inlets,'String',2);
-set(handles.Loops,'String',4);
-set(handles.tube_layer,'String',2);
-set(handles.layer_num,'String',20);
-set(handles.bundles,'String',1);
-set(handles.spacers,'String',0);
-set(handles.spacer_width,'String',0);
-set(handles.Gap_Units,'Value',1);
-set(handles.tube_holders,'String',6);
-set(handles.Bundle_Radius,'String',17);
-set(handles.Bundle_Radius_Units,'Value',4);
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',2);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',23.7);
+        set(handles.Inlet_Gas_Press,'String',1);
+        set(handles.Gas_Mass_Flow,'String',.34);
+        set(handles.Inlet_Liquid_Temp,'String',49.7);
+        set(handles.Inlet_Liquid_Press,'String',2);
+        set(handles.Liquid_Mass_Flow,'String',0.2);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.02);
+        set(handles.Long_Pitch_Ratio,'String',1.37);
+        set(handles.Transverse_Pitch_Ratio,'String',1.67);
+        set(handles.Liquid_Inlets,'String',2);
+        set(handles.Loops,'String',4);
+        set(handles.tube_layer,'String',1);
+        set(handles.layer_num,'String',20);
+        set(handles.bundles,'String',1);
+        set(handles.spacers,'String',0);
+        set(handles.spacer_width,'String',0);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',6);
+        set(handles.Bundle_Radius,'String',8.75);
+        set(handles.Bundle_Radius_Units,'Value',4);
+        set(handles.tube_slope,'String',0);
+        set(handles.heat_rod,'String',0);        
+    case 'Mockup 2.0'
+        set(handles.Gas_Type,'Value',1);
+        set(handles.Liquid_Type,'Value',2);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',25);
+        set(handles.Inlet_Gas_Press,'String',1);
+        set(handles.Gas_Mass_Flow,'String',0.649);
+        set(handles.Inlet_Liquid_Temp,'String',80);
+        set(handles.Inlet_Liquid_Press,'String',2);
+        set(handles.Liquid_Mass_Flow,'String',0.1);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.02);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',2);
+        set(handles.Loops,'String',3);
+        set(handles.tube_layer,'String',2);
+        set(handles.layer_num,'String',10);
+        set(handles.bundles,'String',1);
+        set(handles.spacers,'String',1);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',6);
+        set(handles.Bundle_Radius,'String',25);
+        set(handles.Bundle_Radius_Units,'Value',2);
+        set(handles.tube_slope,'String',0);
+        set(handles.heat_rod,'String',0);        
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns Model_Selection contents as cell array
@@ -1001,6 +1070,52 @@ function Bundle_Radius_Units_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function tube_slope_Callback(hObject, eventdata, handles)
+% hObject    handle to tube_slope (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tube_slope as text
+%        str2double(get(hObject,'String')) returns contents of tube_slope as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tube_slope_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tube_slope (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function heat_rod_Callback(hObject, eventdata, handles)
+% hObject    handle to heat_rod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of heat_rod as text
+%        str2double(get(hObject,'String')) returns contents of heat_rod as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function heat_rod_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to heat_rod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');

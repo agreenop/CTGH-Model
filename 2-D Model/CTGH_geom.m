@@ -10,7 +10,11 @@ end
 %loops=3; %Number of times tube loops around CTGH
 %layer_num=40; %Number of tube layers per sub-bundle
 %tube_layer=3; %Number of tubes per layer per manifold pipe
-heat_rod=1/2; %Number of heater rods in each tube layer (1 every 2 layer)
+% if strcmp(model_selection,'Mk1 CTGH')
+%     heat_rod=1/2; %Number of heater rods in each tube layer (1 every 2 layer)
+% else
+%     heat_rod=0;
+% end
 % bundles=36; %Number of sub-bundles in CTGH
 % spacers=2; %Number of spacer gaps from tie rods in each sub-bundle (allows for air mixing)
 % spacer_width=0.038; %Width of each spacer gap based on tie rod diameter [m]
@@ -28,7 +32,7 @@ L_tube_avg=loops*pi*2*R_c_avg; %Average length of each tube in bundle [m]
 vol_cells_gap=ceil(loops*entry/(spacers+1)); %Number of volume cells between each tie rod gap
 %% General Volume Cell Parameters
 N_L=tube_layer; %Number of columns in longitudinal/radial direction per volume cell
-vol_wid=2*(N_L-1/2)*SL*D_out+D_out; %Width of a volume element in radial direction
+vol_wid=2*N_L*SL*D_out; %Width of a volume element in radial direction
 tube_vert_list=divisors(layer_num); %All possible number of tube rows in a volume cell
 H_possible=((tube_vert_list-1)/2)*D_out*ST+D_out; %Height of each volume cell based on the number of possible tube rows
 [~, min_pos1]=min(abs((H_possible-vol_wid)/vol_wid)); %Determines how close each possible height value is to the width of the volume cell. Making these values as close as possible makes the cell more cubic.

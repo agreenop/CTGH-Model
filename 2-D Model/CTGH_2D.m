@@ -94,7 +94,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
+       [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -296,7 +296,7 @@ i1=1;
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,mu_l,rho_l,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
+                [~,~,~,~,~,u_max_app,rho_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection);
                 chi=1.15;
                 f=0.2;
                 P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
@@ -356,13 +356,13 @@ LMTD=((T_l_in-T_g_avg_out)-(T_l_avg_out-T_g_in))/log((T_l_in-T_g_avg_out)/(T_l_a
 Q_m=UA_total*LMTD;
 inlet_prop=1;
 i=1;
-[UA,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,model_selection,THEEM_model);
+[~,Cp_l,Cp_g]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_avg_total,T_g_avg_total,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection);
 C_min=min(m_g_2_D*Cp_g,m_l_2_D*Cp_l);
 Q_max=C_min*(T_l_in-T_g_in);
 e1=Q_actual/Q_max;
 epsilon=Q_actual/Q_m;
 if strcmp(THEEM_model, '2D')
     fprintf('The effectiveness of this heat exchanger is %4.4f.\n',e1)
-    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,R_co,vol_wid) %Plots the values
+    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
 end
