@@ -5,18 +5,20 @@ clc;clear;
 load('THEEM_Input_3D.mat');
 %% Liquid Mass Flow Rate Distribution
 i=1; %Allows CTGH_Geom to start
-[L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,k_t,rho_t,Cp_t,loops,spacers,section,bundles,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_ci,R_co,vol_wid]=CTGH_geom(tube_material,D_out,t,ST,SL,entry,i);
+[L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i);
 n=bundles*section; %Total number of vertical sections of CTGH
 alpha_press=0.5; %Manifold pressure recovery factor
 gamma_press=-0.25; %Manifold pressure recovery factor increment
 C_f=1.0; %Coefficient of turning loss
 D_manifold=0.280; %Inner diameter of manifold [m]
 L_manifold=5.9087; %Length of manifold [m]
-%Values obtained from 0-D model results
-Re_l_avg=1660.1;
+%Values obtained using 0-D calculations
+Flow_area=tubes*pi/4*D_in^2; %Sum total of flow area inside all tubes
+v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
+Re_l_avg=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
 R_c_avg=L_tube_avg/(loops*pi*2);
 De_l_avg=Re_l_avg*sqrt(D_in/(2*R_c_avg));
-%End of 0-D results
+%End of 0-D calculations
 f_c=(64/Re_l_avg)/(1-(1-(11.6/De_l_avg)^0.45)^2.2); %Average pipe friction factor for CTGH
 F_c=tubes_vol*(pi/4)*D_in^2; %Port (outlet leaving manifold) cross sectional area [m^2]
 F_m=(pi/4)*D_manifold^2; %Manifold cross sectional area [m^2]
@@ -31,6 +33,7 @@ m_l_manifold=zeros(n+1,1);
 m_l_2_D=zeros(n+1,1);
 X=0:L_manifold/n:L_manifold; %Evenly distribute X along manifold starting at x=0
 x=X/L_manifold; %Nondimensionalize X in terms of the length of the manifold
+%Starting values of vectors:
 w(1)=1;
 u_c(1)=0;
 m_l_vol(1)=0;

@@ -2,7 +2,12 @@
 %"cool" gas.  The first time it will assume that the inlet condtion
 %properties remain constant throughout the system.  The second time it will
 %use the average gas temperature.
-function [UA,Cp_l,Cp_g,mu_l,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,gas,liquid,tube_material,D_out,t,ST,SL,T_l_in,T_g_in,P_g_in,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model,model_selection)
+function [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model)
+if strcmp(THEEM_model, '3D')
+    load('THEEM_Input_3D.mat');
+else
+    load('THEEM_Input_2D.mat');
+end
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
     T_g_avg=T_g_in;
@@ -12,24 +17,9 @@ else %Every other time, properties will be calculated at average temperatures an
     T_g_avg=(T_g(i,j)+T_g(i+1,j))/2;
     P_g_avg=(P_g(i,j)+P_g(i+1,j))/2;
 end
-if isequal(model_selection,'Test Bundle 1')
-[tubes_vol,~,N_L,~,D_in,L,H,k_t,~,~,R_curv]=Mockup1_geom(tube_material,D_out,t,i);
-else
-[L,R_curv,H,tubes_vol,~,N_L,~,D_in,k_t]=CTGH_geom(THEEM_model,i);
-end
-switch liquid %Liquid properties depending on type of liquid
-    case 'Fluoride Salt'
-        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flibe_prop(T_l_avg);
-    case 'Water'
-        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Water_prop(T_l_avg);
-    case 'Drakesol 260AT'
-        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Drakesol_260AT_prop(T_l_avg);
-end
-switch gas %Gas properties depending on type of gas
-    case 'Air'
-        [rho_g,Cp_g,mu_g,k_g,Pr_g] = Air_prop(T_g_avg,P_g_avg);
-        [~,~,~,~,Pr_s]=Air_prop(T_l_avg,P_g_avg);
-end
+[L,R_curv,H,tubes_vol,~,N_L,~,D_in]=CTGH_geom(THEEM_model,i);
+[Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_avg);
+[~,~,~,~,~,~,~,~,~,Pr_s,~]=Material_prop(liquid,gas,tube_material,T_l_avg,T_l_avg,P_g_avg); %Estimates gas Prandtl number at tube surface
 %This next part finds UA.
 Re_l=4*m_l_t/(pi*D_in*mu_l); %Reynolds number for liquid
 De_l=Re_l*sqrt(D_in/(2*R_curv)); %Dean number for liquid through a curved pipe

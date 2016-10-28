@@ -54,7 +54,6 @@ function Start_THEEM_2D_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for Start_THEEM_2D
 handles.output = hObject;
-% handles.Cancel_program='Cancel';
 % Update handles structure
 guidata(hObject, handles);
 
@@ -79,43 +78,27 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % hObject    handle to Existing_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% handles.Cancel_program='Run';
-load('THEEM_Input_2D.mat');
 guidata(hObject, handles);
 close(handles.figure1); 
-if isequal(model_selection,'Test Bundle 1')
-    clc;clear;
-    load('THEEM_Input_2D.mat');
-    run('Mockup1_2D.m')
-else
-    clc;clear;
-    load('THEEM_Input_2D.mat');
-    CTGH_2D(THEEM_model);
-end
+clc;clear;
+load('THEEM_Input_2D.mat');
+CTGH_2D(THEEM_model);
 
 % --- Executes on button press in New_button.
 function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-varargout=CTGH_2D_GUI;
+THEEM_model='2D';
+varargout=CTGH_Input_GUI({THEEM_model});
 cancel='Cancel';
 if strcmp(varargout,cancel)==0    
-    load('THEEM_Input_2D.mat');
     guidata(hObject, handles);
     close(handles.figure1);
-    if isequal(model_selection,'Test Bundle 1')
-        clc;clear;
-        load('THEEM_Input_Mockup.mat');
-        run('Mockup1_2D.m')
-    else
-        clc;clear;
-        load('THEEM_Input_2D.mat');
-        CTGH_2D(THEEM_model);
-    end
+    clc;clear;
+    load('THEEM_Input_2D.mat');
+    CTGH_2D(THEEM_model);
 end
-
-
 
 
 % --- Executes on button press in Cancel_button.

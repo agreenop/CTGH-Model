@@ -92,7 +92,8 @@ function New_button_Callback(hObject, eventdata, handles)
 % hObject    handle to New_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-varargout = CTGH_Input_GUI
+THEEM_model='3D';
+varargout=CTGH_Input_GUI({THEEM_model});
 cancel='Cancel';
 if strcmp(varargout,cancel)==0 ;
     % handles.Cancel_program=program;

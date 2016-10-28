@@ -1,35 +1,35 @@
-function varargout = CTGH_2D_GUI(varargin)
-% CTGH_2D_GUI MATLAB code for CTGH_2D_GUI.fig
-%      CTGH_2D_GUI, by itself, creates a new CTGH_2D_GUI or raises the existing
+function varargout = CTGH_Input_GUI(varargin)
+% CTGH_Input_GUI MATLAB code for CTGH_Input_GUI.fig
+%      CTGH_Input_GUI, by itself, creates a new CTGH_Input_GUI or raises the existing
 %      singleton*.
 %
-%      H = CTGH_2D_GUI returns the handle to a new CTGH_2D_GUI or the handle to
+%      H = CTGH_Input_GUI returns the handle to a new CTGH_Input_GUI or the handle to
 %      the existing singleton*.
 %
-%      CTGH_2D_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in CTGH_2D_GUI.M with the given input arguments.
+%      CTGH_Input_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in CTGH_Input_GUI.M with the given input arguments.
 %
-%      CTGH_2D_GUI('Property','Value',...) creates a new CTGH_2D_GUI or raises the
+%      CTGH_Input_GUI('Property','Value',...) creates a new CTGH_Input_GUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before CTGH_2D_GUI_OpeningFcn gets called.  An
+%      applied to the GUI before CTGH_Input_GUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to CTGH_2D_GUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to CTGH_Input_GUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help CTGH_2D_GUI
+% Edit the above text to modify the response to help CTGH_Input_GUI
 
-% Last Modified by GUIDE v2.5 11-Oct-2016 16:28:46
+% Last Modified by GUIDE v2.5 21-Oct-2016 17:13:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @CTGH_2D_GUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @CTGH_2D_GUI_OutputFcn, ...
+                   'gui_OpeningFcn', @CTGH_Input_GUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @CTGH_Input_GUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,26 +44,58 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before CTGH_2D_GUI is made visible.
-function CTGH_2D_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before CTGH_Input_GUI is made visible.
+function CTGH_Input_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to CTGH_2D_GUI (see VARARGIN)
+% varargin   command line arguments to CTGH_Input_GUI (see VARARGIN)
 
-% Choose default command line output for CTGH_2D_GUI
+% Choose default command line output for CTGH_Input_GUI
 handles.output = hObject;
 handles.Cancel_program='Cancel';
+THEEM_model=varargin{1}{1};
+handles.THEEM_model=THEEM_model;
 % Update handles structure
 guidata(hObject, handles);
-
-% UIWAIT makes CTGH_2D_GUI wait for user response (see UIRESUME)
+% get(handles.CTGH_Input_GUI,'UserData');
+switch THEEM_model
+    case '0D'
+        set(handles.tube_holders,'Enable','off')
+    case '2D'
+        set(handles.Outlet_Liquid_Temp,'Enable','off')
+        set(handles.Outlet_Gas_Temp,'Enable','off')
+    case '3D'
+        set(handles.Outlet_Liquid_Temp,'Enable','off')
+        set(handles.Outlet_Gas_Temp,'Enable','off')        
+    case 'Optimization'
+         set(handles.Tube_Diameter,'Enable','off')
+         set(handles.Diameter_Units,'Enable','off')
+         set(handles.Tube_Thickness,'Enable','off')
+         set(handles.Thickness_Units,'Enable','off')
+         set(handles.Long_Pitch_Ratio,'Enable','off')
+         set(handles.Transverse_Pitch_Ratio,'Enable','off')
+         set(handles.Liquid_Inlets,'Enable','off')
+         set(handles.Loops,'Enable','off')
+         set(handles.tube_layer,'Enable','off')
+         set(handles.layer_num,'Enable','off')
+         set(handles.bundles,'Enable','off')
+         set(handles.spacers,'Enable','off')
+         set(handles.spacer_width,'Enable','off')
+         set(handles.tube_holders,'Enable','off')
+         set(handles.Bundle_Radius,'Enable','off')
+         set(handles.Gap_Units,'Enable','off')
+         set(handles.Bundle_Radius_Units,'Enable','off')
+         set(handles.tube_slope,'Enable','off')
+         set(handles.heat_rod,'Enable','off')
+        end
+% UIWAIT makes CTGH_Input_GUI wait for user response (see UIRESUME)
 uiwait(hObject);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = CTGH_2D_GUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = CTGH_Input_GUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -74,10 +106,11 @@ varargout{1} = handles.Cancel_program;
 
 
 % --- Executes on button press in Run.
-function Run_Callback(hObject, eventdata, handles)
+function Run_Callback(hObject, eventdata, handles, varargin)
 % hObject    handle to Run (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+THEEM_model=handles.THEEM_model;
 gas_index=get(handles.Gas_Type,'Value');
 gas_list=get(handles.Gas_Type,'String');
 gas=char(gas_list(gas_index));
@@ -85,7 +118,9 @@ liqud_index=get(handles.Liquid_Type,'Value');
 liquid_list=get(handles.Liquid_Type,'String');
 liquid=char(liquid_list(liqud_index));
 T_g_in=str2num(get(handles.Inlet_Gas_Temp,'String'));
+T_g_out=str2num(get(handles.Outlet_Gas_Temp,'String'));
 T_l_in=str2num(get(handles.Inlet_Liquid_Temp,'String'));
+T_l_out=str2num(get(handles.Outlet_Liquid_Temp,'String'));
 P_g_in=str2num(get(handles.Inlet_Gas_Press,'String'));
 P_l_in=str2num(get(handles.Inlet_Liquid_Press,'String'));
 m_g=str2num(get(handles.Gas_Mass_Flow,'String'));
@@ -171,11 +206,27 @@ end
 tube_slope=str2num(get(handles.tube_slope,'String'));
 heat_rod=str2num(get(handles.heat_rod,'String'));
 handles.Cancel_program='Run';
-THEEM_model='2D';
-save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in',...
-    'm_g','m_l','tube_material','D_out','t','SL','ST','entry','THEEM_model','loops',...
-    'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders',...
-    'R_ci','tube_slope','heat_rod','model_selection')
+switch THEEM_model
+    case '0D'
+        save('0-D Model/THEEM_Input_0D.mat','gas','liquid','T_g_in','T_l_in',...
+            'T_g_out','T_l_out','P_g_in','P_l_in','m_g','m_l','tube_material',...
+            'D_out','t','SL','ST','entry','THEEM_model','loops','tube_layer',...
+            'layer_num','bundles','spacers','spacer_width','R_ci','tube_slope','heat_rod')
+    case '2D'
+        save('2-D Model/THEEM_Input_2D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in',...
+            'm_g','m_l','tube_material','D_out','t','SL','ST','entry','THEEM_model','loops',...
+            'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders',...
+            'R_ci','tube_slope','heat_rod')
+    case '3D'
+        save('3-D Model/THEEM_Input_3D.mat','gas','liquid','T_g_in','T_l_in','P_g_in','P_l_in',...
+            'm_g','m_l','tube_material','D_out','t','SL','ST','entry','THEEM_model','loops',...
+            'tube_layer','layer_num','bundles','spacers','spacer_width','tube_holders',...
+            'R_ci','tube_slope','heat_rod')        
+    case 'Optimization'
+        save('Optimization Program/THEEM_Input_Optimization.mat','gas','liquid',...
+            'T_g_in','T_l_in','T_g_out','T_l_out','P_g_in','P_l_in','m_g',...
+            'm_l','tube_material')
+        end    
 guidata(hObject, handles);
 close(handles.figure1); 
 
@@ -386,9 +437,11 @@ switch Model_Selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',418.6);
+        set(handles.Outlet_Gas_Temp,'String',670);
         set(handles.Inlet_Gas_Press,'String',18.76);
         set(handles.Gas_Mass_Flow,'String',418.5);
         set(handles.Inlet_Liquid_Temp,'String',700);
+        set(handles.Outlet_Liquid_Temp,'String',600);
         set(handles.Inlet_Liquid_Press,'String',3.5);
         set(handles.Liquid_Mass_Flow,'String',480.2);
         set(handles.Tube_Diameter,'String',0.25);
@@ -415,9 +468,11 @@ switch Model_Selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',23.7);
+        set(handles.Outlet_Gas_Temp,'String',43);
         set(handles.Inlet_Gas_Press,'String',1);
         set(handles.Gas_Mass_Flow,'String',.34);
         set(handles.Inlet_Liquid_Temp,'String',49.7);
+        set(handles.Outlet_Liquid_Temp,'String',41);
         set(handles.Inlet_Liquid_Press,'String',2);
         set(handles.Liquid_Mass_Flow,'String',0.2);
         set(handles.Tube_Diameter,'String',0.25);
@@ -444,9 +499,11 @@ switch Model_Selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',25);
+        set(handles.Outlet_Gas_Temp,'String',51);
         set(handles.Inlet_Gas_Press,'String',1);
         set(handles.Gas_Mass_Flow,'String',0.649);
         set(handles.Inlet_Liquid_Temp,'String',80);
+        set(handles.Outlet_Liquid_Temp,'String',40);
         set(handles.Inlet_Liquid_Press,'String',2);
         set(handles.Liquid_Mass_Flow,'String',0.1);
         set(handles.Tube_Diameter,'String',0.25);
@@ -747,9 +804,11 @@ switch model_selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',418.6);
+        set(handles.Outlet_Gas_Temp,'String',670);
         set(handles.Inlet_Gas_Press,'String',18.76);
         set(handles.Gas_Mass_Flow,'String',418.5);
         set(handles.Inlet_Liquid_Temp,'String',700);
+        set(handles.Outlet_Liquid_Temp,'String',600);
         set(handles.Inlet_Liquid_Press,'String',3.5);
         set(handles.Liquid_Mass_Flow,'String',480.2);
         set(handles.Tube_Diameter,'String',0.25);
@@ -768,7 +827,7 @@ switch model_selection
         set(handles.Bundle_Radius,'String',0.662);
         set(handles.Bundle_Radius_Units,'Value',1);
         set(handles.tube_slope,'String',0.003);
-        set(handles.heat_rod,'String',1/2);        
+        set(handles.heat_rod,'String',1/2);
     case 'Test Bundle 1'
         set(handles.Gas_Type,'Value',1);
         set(handles.Liquid_Type,'Value',2);
@@ -776,9 +835,11 @@ switch model_selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',23.7);
+        set(handles.Outlet_Gas_Temp,'String',43);
         set(handles.Inlet_Gas_Press,'String',1);
         set(handles.Gas_Mass_Flow,'String',.34);
         set(handles.Inlet_Liquid_Temp,'String',49.7);
+        set(handles.Outlet_Liquid_Temp,'String',41);
         set(handles.Inlet_Liquid_Press,'String',2);
         set(handles.Liquid_Mass_Flow,'String',0.2);
         set(handles.Tube_Diameter,'String',0.25);
@@ -797,7 +858,7 @@ switch model_selection
         set(handles.Bundle_Radius,'String',8.75);
         set(handles.Bundle_Radius_Units,'Value',4);
         set(handles.tube_slope,'String',0);
-        set(handles.heat_rod,'String',0);        
+        set(handles.heat_rod,'String',0);
     case 'Mockup 2.0'
         set(handles.Gas_Type,'Value',1);
         set(handles.Liquid_Type,'Value',2);
@@ -805,9 +866,11 @@ switch model_selection
         set(handles.Diameter_Units,'Value',1);
         set(handles.Thickness_Units,'Value',1);
         set(handles.Inlet_Gas_Temp,'String',25);
+        set(handles.Outlet_Gas_Temp,'String',51);
         set(handles.Inlet_Gas_Press,'String',1);
         set(handles.Gas_Mass_Flow,'String',0.649);
         set(handles.Inlet_Liquid_Temp,'String',80);
+        set(handles.Outlet_Liquid_Temp,'String',40);
         set(handles.Inlet_Liquid_Press,'String',2);
         set(handles.Liquid_Mass_Flow,'String',0.1);
         set(handles.Tube_Diameter,'String',0.25);
@@ -826,7 +889,7 @@ switch model_selection
         set(handles.Bundle_Radius,'String',25);
         set(handles.Bundle_Radius_Units,'Value',2);
         set(handles.tube_slope,'String',0);
-        set(handles.heat_rod,'String',0);        
+        set(handles.heat_rod,'String',0);
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns Model_Selection contents as cell array
@@ -1112,6 +1175,52 @@ function heat_rod_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function heat_rod_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to heat_rod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Outlet_Gas_Temp_Callback(hObject, eventdata, handles)
+% hObject    handle to Outlet_Gas_Temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Outlet_Gas_Temp as text
+%        str2double(get(hObject,'String')) returns contents of Outlet_Gas_Temp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Outlet_Gas_Temp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Outlet_Gas_Temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Outlet_Liquid_Temp_Callback(hObject, eventdata, handles)
+% hObject    handle to Outlet_Liquid_Temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Outlet_Liquid_Temp as text
+%        str2double(get(hObject,'String')) returns contents of Outlet_Liquid_Temp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Outlet_Liquid_Temp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Outlet_Liquid_Temp (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
