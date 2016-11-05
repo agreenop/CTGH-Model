@@ -5,12 +5,14 @@
 function [Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t,rho_t,Cp_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_avg)
 %% Liquid Properties
 switch liquid %Liquid properties depending on type of liquid
-    case 'Fluoride Salt'
+    case 'FLiBe Salt'
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flibe_prop(T_l_avg);
     case 'Water'
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Water_prop(T_l_avg);
     case 'Drakesol 260AT'
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Drakesol_260AT_prop(T_l_avg);
+    case 'FLiNaK Salt'
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flinak_prop(T_l_avg);
 end
 %% Gas Properties
 switch gas %Gas properties depending on type of gas

@@ -11,7 +11,7 @@ T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
 T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
 LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
 %% Thermodynamic Properties
-[Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t,rho_t,Cp_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_in);
+[Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_in);
 Vol_flow_g=m_g/rho_g; %Volumetric flow rate of gas [m^3/s]
 Vol_flow_l=m_l/rho_l; %Volumetric flow rate of liquid [m^3/s]
 %% CTAH Geometry and Bundle Height
@@ -36,7 +36,7 @@ Re_g=rho_g*v_g_max*D_out/mu_g; %Gas Reynolds number
 N_L_list=[1,2,3,4,5,7,10,13,16,20];
 C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99,1];
     if tube_col<20
-        C2=interp1(N_L_list,C2_list,tube_count);
+        C2=interp1(N_L_list,C2_list,tube_col);
     else
         C2=1;
     end
