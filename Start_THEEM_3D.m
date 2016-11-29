@@ -82,8 +82,9 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
-clc;clear;
+clc;evalin('base','clear');
 run('CTGH_3D.m')
+evalin('base','load(''THEEM_Output_3D.mat'')');
 
 
 
@@ -99,8 +100,9 @@ if strcmp(varargout,cancel)==0 ;
     % handles.Cancel_program=program;
     guidata(hObject, handles);
     close(handles.figure1);
-    clc;clear;
+    clc;evalin('base','clear');
     run('CTGH_3D.m')
+    evalin('base','load(''THEEM_Output_3D.mat'')');
 end
 
 

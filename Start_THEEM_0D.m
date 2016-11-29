@@ -82,9 +82,10 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
 close(handles.figure1); 
-clc;clear;
+clc;evalin('base','clear');
 load('THEEM_Input_0D.mat');
 CTGH_0D(THEEM_model)
+evalin('base','load(''THEEM_Output_0D.mat'')');
 
 
 
@@ -98,12 +99,12 @@ THEEM_model='0D';
 varargout=CTGH_Input_GUI({THEEM_model});
 cancel='Cancel';
 if strcmp(varargout,cancel)==0    
-%     handles.Cancel_program=program;
     guidata(hObject, handles);
     close(handles.figure1);
-    clc;clear;
+    clc;evalin('base','clear');
     load('THEEM_Input_0D.mat');
     CTGH_0D(THEEM_model)
+    evalin('base','load(''THEEM_Output_0D.mat'')');
 end
 
 

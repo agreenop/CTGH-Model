@@ -80,9 +80,10 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 close(handles.figure1); 
-clc;clear;
+clc;evalin('base','clear');
 load('THEEM_Input_2D.mat');
 CTGH_2D(THEEM_model);
+evalin('base','load(''THEEM_Output_2D.mat'')');
 
 % --- Executes on button press in New_button.
 function New_button_Callback(hObject, eventdata, handles)
@@ -95,9 +96,10 @@ cancel='Cancel';
 if strcmp(varargout,cancel)==0    
     guidata(hObject, handles);
     close(handles.figure1);
-    clc;clear;
+    clc;evalin('base','clear');
     load('THEEM_Input_2D.mat');
     CTGH_2D(THEEM_model);
+    evalin('base','load(''THEEM_Output_2D.mat'')');
 end
 
 
