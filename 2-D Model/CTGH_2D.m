@@ -243,10 +243,12 @@ i1=1;
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,~,u_max_app,rho_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
-                chi=1.15;
-                f=0.2;
-                P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
+                [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
+                [dP_total] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g);
+%                 chi=1.15;
+%                 f=0.2;
+%                 P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
+                P_g(i+1,j)=P_g(i,j)-dP_total;
               end
           end
          end
