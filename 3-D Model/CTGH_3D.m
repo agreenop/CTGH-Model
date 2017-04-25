@@ -6,12 +6,16 @@ load('THEEM_Input_3D.mat');
 %% Liquid Mass Flow Rate Distribution
 i=1; %Allows CTGH_Geom to start
 [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i);
+[Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_in,T_g_in,P_g_in);
 n=bundles*section; %Total number of vertical sections of CTGH
 alpha_press=0.5; %Manifold pressure recovery factor
 gamma_press=-0.25; %Manifold pressure recovery factor increment
 C_f=1.0; %Coefficient of turning loss
 D_manifold=0.280; %Inner diameter of manifold [m]
-L_manifold=5.9087; %Length of manifold [m]
+disk_thick=.003; %Thickness of plate separating bundles
+H_sub=D_out*ST*((layer_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
+H_bank=(H_sub+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
+L_manifold=H_bank; %Length of manifold [m]
 %Values obtained using 0-D calculations
 Flow_area=tubes*pi/4*D_in^2; %Sum total of flow area inside all tubes
 v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
@@ -72,20 +76,20 @@ T_g_store{1}=0;
 P_l_store{1}=0;
 P_g_store{1}=0;
 Q_store{1}=0;
-for i=2:n+1
-    [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i),m_g_2_D(i));
-    T_l_out_store{i}=T_l_out;
-    T_g_out_store{i}=T_g_out;
-    P_l_out_store{i}=P_l_out;
-    P_g_out_store{i}=P_g(size(P_g,1),:);
-    T_l_store{i}=T_l;
-    T_g_store{i}=T_g;
-    P_l_store{i}=P_l;
-    P_g_store{i}=P_g;
-    Q_store{i}=Q;
-    U_store(i)=U_avg;
-    Area_store(i)=A_total;
-    epsilon_store(i)=epsilon;
-end
+% for i=2:n+1
+%     [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i),m_g_2_D(i));
+%     T_l_out_store{i}=T_l_out;
+%     T_g_out_store{i}=T_g_out;
+%     P_l_out_store{i}=P_l_out;
+%     P_g_out_store{i}=P_g(size(P_g,1),:);
+%     T_l_store{i}=T_l;
+%     T_g_store{i}=T_g;
+%     P_l_store{i}=P_l;
+%     P_g_store{i}=P_g;
+%     Q_store{i}=Q;
+%     U_store(i)=U_avg;
+%     Area_store(i)=A_total;
+%     epsilon_store(i)=epsilon;
+% end
 save('3-D Model/THEEM_Output_3D.mat');
 

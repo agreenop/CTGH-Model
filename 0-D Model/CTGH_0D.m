@@ -18,10 +18,10 @@ Vol_flow_l=m_l/rho_l; %Volumetric flow rate of liquid [m^3/s]
 D_in=D_out-2*t; 
 disk_thick=.003; %Thickness of plate separating bundles
 D_curve_inner=2*R_ci; %Average tube bundle inside diameter [m]
-tube_col=entry*(tube_layer*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
+N_L=entry*(tube_layer*2)*loops; %Number of tube columns, inlcuding heating rods & accounting for staggered arrangement
 tubes_manifold=layer_num*(tube_layer-heat_rod); %Number of tubes per manifold per sub-bundle
 tubes=entry*tubes_manifold*bundles; %Total number of tubes in CTGH
-bank_depth=tube_col*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
+bank_depth=N_L*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
 D_curve_outer=D_curve_inner+2*bank_depth; %Average tube bundle outside diameter [m]
 D_curv_avg=(D_curve_outer+D_curve_inner)/2; %Diameter of the middle of the tube bundle [m]
 H=D_out*ST*((layer_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
@@ -30,13 +30,13 @@ Area_avg=pi*D_curv_avg*(H_bank-disk_thick*bundles); %Average/Middle of bundle cr
 L_tube=loops*pi*D_curv_avg; %Average length of each tube in bundle
 Area_surf=pi*D_out*L_tube*tubes; %Surface area of tubes, based on outside diameter
 %% Analysis of Gas Cross Flow
-v_g_avg=Vol_flow_g/Area_avg; %Average velocity of gas based on bundle flow area [m/s]
-v_g_max=v_g_avg*max((ST/(ST-1)),(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))); %Maximum gas velocity between tubes [m/s]
-Re_g=rho_g*v_g_max*D_out/mu_g; %Gas Reynolds number
+u_g_avg=Vol_flow_g/Area_avg; %Average velocity of gas based on bundle flow area [m/s]
+u_g_max=u_g_avg*max((ST/(ST-1)),(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))); %Maximum gas velocity between tubes [m/s]
+Re_g=rho_g*u_g_max*D_out/mu_g; %Gas Reynolds number
 N_L_list=[1,2,3,4,5,7,10,13,16,20];
 C2_list=[0.64,0.76,0.84,0.89,0.92,0.95,0.97,0.98,0.99,1];
-    if tube_col<20
-        C2=interp1(N_L_list,C2_list,tube_col);
+    if N_L<20
+        C2=interp1(N_L_list,C2_list,N_L);
     else
         C2=1;
     end
@@ -55,7 +55,27 @@ end
 Nu_g=C2*C1*Re_g^m*Pr_g^0.36; %Tube bank Nusselt correlation, 0.7<Pr<2000, 1000<Re_g<2*10^6 (Incropera Eq. 7.56)
 h_g=k_g*Nu_g/D_out; %Gas heat transfer coefficient
 %% Analysis of Salt Flow in Tubes
-Nu_l=3.66; %Nusselt number for liquid assuming laminar flow
+Flow_area=tubes*pi/4*D_in^2; %Sum total of flow area inside all tubes
+v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
+Re_l=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
+De_l=Re_l*sqrt(D_in/(D_curv_avg)); %Dean number for liquid through a curved pipe
+Re_c=2300*(1+12*sqrt(D_in/(D_curv_avg))); %Critical reynolds number for a cruved pipe
+if Re_l<=Re_c %Laminar flow
+    Nu_l=((3.657+4.343/(1+957/(De_l^2*Pr_l))^2)^3+1.158*(De_l/(1+.477/Pr_l))^(3/2))^(1/3); %Nusselt number for fully developed laminar flow in a curved pipe with uniform wall temp (Manlapaz/Churchill)
+    if De_l<=11.6
+        f_l=64/Re_l; %Friction Factor for laminar flow in pipe
+    elseif De_l>11.6 && De_l<=2000
+         f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
+    elseif De_l>2000
+        f_l=7.0144*sqrt(De_l)/Re_l;
+    end
+elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
+   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
+   Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
+elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
+   f_l=.336*(D_in/(2*R_curv))^0.1*Re_l^-0.2; %Friction factor for turbulent flow for smooth curved pipe
+   Nu_l=((f_l/8)*(Re_l-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1)); %Nusselt number for straight pipe with turbulence
+end 
 h_l=k_l*Nu_l/D_in; %Gas heat transfer coefficient
 %% Overall Heat Transfer Coefficient U
 R_g=1/h_g; %Gas thermal resistance based on outer diameter
@@ -73,16 +93,9 @@ Q_max=C_min*(T_l_in-T_g_in)/10^6;
 epsilon=Q_tot/Q_max;
 %% Pressure drop across CTGH
 % Gas Pressure Drop
-f=0.4; %Gas friction factor from Incropera Fig. 7.14
-chi=1.00; %Correction factor from Incropera Fig. 7.14
-deltaP_tube_g=1/2*f*chi*rho_g*v_g_max^2; %Pressure drop across tube column [Pa]
-deltaP_g=deltaP_tube_g*tube_col*10^-5; %Pressure drop across entire tube bundle [bar]
+deltaP_g = StaggeredPressureDrop(ST,SL,u_g_max,rho_g,N_L,Re_g);%Pressure drop across entire tube bundle [bar]
 
 %Salt Pressure Drop
-Flow_area=tubes*pi/4*D_in^2; %Sum total of flow area inside all tubes
-v_l=m_l/(rho_l*Flow_area); %Average velocity of salt
-Re_l=rho_l*v_l*D_in/mu_l; %Salt Reynolds number
-f_l=64/Re_l; %Salt friction factor (assuming laminar flow)
 deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]
 %% Save variables to output files
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
@@ -91,6 +104,6 @@ else %Runs for Optimization Code only
     fname2=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
     save(fname2,'tubes','D_curve_outer','H_bank','Area_surf','v_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
     range_output=sprintf('I%d:T%d',i+1,i+1);
-    B=[tubes,D_curve_outer,H_bank,Area_surf,v_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
+    B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
     xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',B,range_output);
 end
