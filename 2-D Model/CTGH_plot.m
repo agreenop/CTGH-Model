@@ -1,6 +1,6 @@
 %This function will map the temperatures, pressures, and heat transfer
 %outputs for the liquid coolant and gas medium for the CTGH.
-function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width)
+function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width)
 %Plot liquid coolant temperatures
 rho=zeros(1,size(T_l,1));
 rho(1)=R_ci+vol_wid/2;
@@ -91,6 +91,7 @@ axis equal tight;
 title('UA Distribution')
 colorbar;
 title(colorbar,'Watts/Kelvin');
+%Plot Gas Reynolds Number
 figure (7)
 surf(r.*cos(th),r.*sin(th),Re_g_matrix,'linestyle', 'none'); 
 xlabel('Position on X-axis, m')
@@ -99,7 +100,17 @@ view(2);
 axis equal tight;
 title([gas ' Reynolds Number Distribution'])
 colorbar;
+%Plot Liquid Reynolds Number
 figure (8)
+surf(r.*cos(th),r.*sin(th),Re_l_matrix,'linestyle', 'none'); 
+xlabel('Position on X-axis, m')
+ylabel('Position on Y-axis, m')
+view(2);
+axis equal tight;
+title([liquid ' Reynolds Number Distribution'])
+colorbar;
+%Plot Gas Convective Heat Transfer Coefficient
+figure (9)
 surf(r.*cos(th),r.*sin(th),h_g_matrix,'linestyle', 'none'); 
 xlabel('Position on X-axis, m')
 ylabel('Position on Y-axis, m')
@@ -108,15 +119,18 @@ axis equal tight;
 title([gas ' Heat Transfer Coefficient (h) Distribution'])
 colorbar;
 title(colorbar,'W/(m^2*K)');
-figure (9)
-surf(r.*cos(th),r.*sin(th),Re_l_matrix,'linestyle', 'none'); 
+%Plot Liquid Convective Heat Transfer Coefficient
+figure (10)
+surf(r.*cos(th),r.*sin(th),h_l_matrix,'linestyle', 'none'); 
 xlabel('Position on X-axis, m')
 ylabel('Position on Y-axis, m')
 view(2);
 axis equal tight;
-title([liquid ' Reynolds Number Distribution'])
+title([liquid ' Heat Transfer Coefficient (h) Distribution'])
 colorbar;
-figure (10)
+title(colorbar,'W/(m^2*K)');
+%Plot Overall Heat Transfer Coefficient, U
+figure (11)
 surf(r.*cos(th),r.*sin(th),U_matrix,'linestyle', 'none'); 
 view(2);
 axis equal tight;

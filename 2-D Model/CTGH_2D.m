@@ -23,6 +23,8 @@ Re_g_matrix=zeros(size(Q));
 h_g_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
+Nu_l_matrix=zeros(size(Q));
+Nu_l_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
 if strcmp(THEEM_model, '3D') %For 3-D calculations, calculates for each bundle
@@ -94,15 +96,18 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
+       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
        Velocity_matrix(i,j)=u_max_app;
        Re_g_matrix(i,j)=Re_g;
        h_g_matrix(i,j)=h_g;
+       h_l_matrix(i,j)=h_l;
        Re_l_matrix(i,j)=Re_l;
        De_l_matrix(i,j)=De_l;
+       Nu_g_matrix(i,j)=Nu_g;
+       Nu_l_matrix(i,j)=Nu_l;
        A(count,l2)=-m_l_vol*Cp_l;
        A(count,l1)=m_l_vol*Cp_l;
        A(count,q1)=-1;
@@ -245,9 +250,6 @@ i1=1;
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
                 [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
                 [dP_total] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g);
-%                 chi=1.15;
-%                 f=0.2;
-%                 P_g(i+1,j)=P_g(i,j)-(N_L*chi*rho_g*f*u_max_app^2/2)*10^-5;
                 P_g(i+1,j)=P_g(i,j)-dP_total;
               end
           end
@@ -269,6 +271,9 @@ T_l(T_l==0)=NaN; %Places "NaN" in blank spots in T_l matrix
 UA_matrix(UA_matrix==0)=NaN;
 Re_g_matrix(Re_g_matrix==0)=NaN;
 Re_l_matrix(Re_l_matrix==0)=NaN;
+Nu_l_matrix(Nu_l_matrix==0)=NaN;
+Nu_g_matrix(Nu_g_matrix==0)=NaN;
+h_l_matrix(h_l_matrix==0)=NaN;
 h_g_matrix(h_g_matrix==0)=NaN;
 U_avg=sum(sum(U_matrix))/nnz(U_matrix);
 A_total=sum(sum(A_matrix));
@@ -317,6 +322,6 @@ if strcmp(THEEM_model, '2D')
     fprintf('The %s outlet temperature is %1.1f%cC.\n',liquid,T_l_outlet,char(176))
     fprintf('The %s outlet temperature is %1.1f%cC.\n',gas,T_g_outlet,char(176))
     fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_total)
-    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
+    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
 end
