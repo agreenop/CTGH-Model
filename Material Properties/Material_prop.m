@@ -13,11 +13,15 @@ switch liquid %Liquid properties depending on type of liquid
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Drakesol_260AT_prop(T_l_avg);
     case 'FLiNaK Salt'
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Flinak_prop(T_l_avg);
+    case 'Solar Salt (NaNO3?KNO3)'
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Solar_Nitrate_Salt_prop(T_l_avg);
 end
 %% Gas Properties
 switch gas %Gas properties depending on type of gas
     case 'Air'
         [rho_g,Cp_g,mu_g,k_g,Pr_g] = Air_prop(T_g_avg,P_g_avg);
+    case 'Helium'
+        [rho_g,Cp_g,mu_g,k_g,Pr_g] = Helium_prop(T_g_avg,P_g_avg);
 end
 %% Tube Material Properties
 switch tube_material
