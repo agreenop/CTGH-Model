@@ -492,7 +492,7 @@ switch Model_Selection
         set(handles.Bundle_Radius_Units,'Value',4);
         set(handles.tube_slope,'String',0);
         set(handles.heat_rod,'String',0);
-    case 'Mockup 2.0'
+    case 'CASET'
         set(handles.Gas_Type,'Value',1);
         set(handles.Liquid_Type,'Value',2);
         set(handles.Tube_Material,'Value',1);
@@ -509,7 +509,7 @@ switch Model_Selection
         set(handles.Tube_Diameter,'String',0.25);
         set(handles.Tube_Thickness,'String',0.02);
         set(handles.Long_Pitch_Ratio,'String',1.256);
-        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Transverse_Pitch_Ratio,'String',1.50);
         set(handles.Liquid_Inlets,'String',2);
         set(handles.Loops,'String',3);
         set(handles.tube_layer,'String',2);
@@ -859,7 +859,7 @@ switch model_selection
         set(handles.Bundle_Radius_Units,'Value',4);
         set(handles.tube_slope,'String',0);
         set(handles.heat_rod,'String',0);
-    case 'Mockup 2.0'
+    case 'CASET'
         set(handles.Gas_Type,'Value',1);
         set(handles.Liquid_Type,'Value',2);
         set(handles.Tube_Material,'Value',1);
@@ -876,7 +876,7 @@ switch model_selection
         set(handles.Tube_Diameter,'String',0.25);
         set(handles.Tube_Thickness,'String',0.02);
         set(handles.Long_Pitch_Ratio,'String',1.256);
-        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Transverse_Pitch_Ratio,'String',1.50);
         set(handles.Liquid_Inlets,'String',2);
         set(handles.Loops,'String',3);
         set(handles.tube_layer,'String',2);

@@ -1,6 +1,6 @@
 %This function will map the temperatures, pressures, and heat transfer
 %outputs for the liquid coolant and gas medium for the CTGH.
-function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width)
+function CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width)
 %Plot liquid coolant temperatures
 rho=zeros(1,size(T_l,1));
 rho(1)=R_ci+vol_wid/2;
@@ -134,8 +134,28 @@ figure (11)
 surf(r.*cos(th),r.*sin(th),U_matrix,'linestyle', 'none'); 
 view(2);
 axis equal tight;
-title(' U distribution')
+title(' U Distribution')
 xlabel('Position on X-axis, m')
 ylabel('Position on Y-axis, m')
 colorbar;
 title(colorbar,'W/(m^2*K)');
+%Plot outer tube surface temperatures
+figure (12)
+surf(r.*cos(th),r.*sin(th),T_s_out_matrix,'linestyle', 'none'); 
+view(2);
+axis equal tight;
+title({'Tube Outer Surface','Temperature Distribution'})
+xlabel('Position on X-axis, m')
+ylabel('Position on Y-axis, m')
+colorbar;
+title(colorbar,'Degrees Celsius');
+%Plot inner tube surface temperatures
+figure (13)
+surf(r.*cos(th),r.*sin(th),T_s_in_matrix,'linestyle', 'none'); 
+view(2);
+axis equal tight;
+title({'Tube Inner Surface','Temperature Distribution'})
+xlabel('Position on X-axis, m')
+ylabel('Position on Y-axis, m')
+colorbar;
+title(colorbar,'Degrees Celsius');

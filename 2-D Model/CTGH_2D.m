@@ -21,10 +21,15 @@ A_matrix=zeros(size(Q));
 Velocity_matrix=zeros(size(Q));
 Re_g_matrix=zeros(size(Q));
 h_g_matrix=zeros(size(Q));
+h_l_matrix=zeros(size(Q));
 Re_l_matrix=zeros(size(Q));
 De_l_matrix=zeros(size(Q));
 Nu_l_matrix=zeros(size(Q));
-Nu_l_matrix=zeros(size(Q));
+Nu_g_matrix=zeros(size(Q));
+i1_matrix=zeros(size(Q));
+j1_matrix=zeros(size(Q));
+T_s_in_matrix=zeros(size(Q));
+T_s_out_matrix=zeros(size(Q));
 T_l_out=zeros(entry,1); %Matrix of outlet temperatures for liquid
 P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
 if strcmp(THEEM_model, '3D') %For 3-D calculations, calculates for each bundle
@@ -88,6 +93,9 @@ while i>0
          if i1==0
             i1=1;
          end
+       %These matrices store the position of the next volume for each volume based on the flow path of the liquid. 
+       i1_matrix(i,j)=i1; 
+       j1_matrix(i,j)=j1;
 %This section assigns the values of the coefficient matrix that will solve for the temperatures and heat transfer for each volume.        
        l1=(i-1)*size(T_l,2)+j; %Placement of T_l(i,j) coefficient
        l2=(i1-1)*size(T_l,2)+j1; %Placement of T_l(i1,j1) coefficient
@@ -96,7 +104,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
+       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,THEEM_model);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -244,17 +252,27 @@ i1=1;
      for i=1:size(P_g,1)-1 
          for j=1:size(P_g,2)
           if P_g(i+1,j)~=P_g_in
-              if i==size(T_g,1)-5||i==size(T_g,1)-10
+              if i==gaps_position-1
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,THEEM_model);
+                [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,THEEM_model);
                 [dP_total] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g);
                 P_g(i+1,j)=P_g(i,j)-dP_total;
               end
           end
          end
      end
+%This section calculates the inside and outside surface temperatures of the
+%tubes across the tube bundle.
+for i=1:size(Q,1)
+    for j=1:size(Q,2)
+        if Q(i,j)~=0
+           T_s_in_matrix(i,j)=(T_l(i,j)+T_l(i1_matrix(i,j),j1_matrix(i,j)))/2-Q(i,j)/(h_l_matrix(i,j)*A_matrix(i,j)*D_in/D_out);
+           T_s_out_matrix(i,j)=(T_g(i,j)+T_g(i+1,j))/2+Q(i,j)/(h_g_matrix(i,j)*A_matrix(i,j));
+        end
+    end
+end
 %This condition is met when all of the new temperatures of the liquid based 
 %on the new temperature-dependent properties are within 0.001 of all of the 
 %corresponding old temperatures based on the old temperature-dependent
@@ -278,6 +296,10 @@ h_g_matrix(h_g_matrix==0)=NaN;
 U_avg=sum(sum(U_matrix))/nnz(U_matrix);
 A_total=sum(sum(A_matrix));
 U_matrix(U_matrix==0)=NaN;
+i1_matrix(i1_matrix==0)=NaN;
+j1_matrix(j1_matrix==0)=NaN;
+T_s_in_matrix(T_s_in_matrix==0)=NaN;
+T_s_out_matrix(T_s_out_matrix==0)=NaN;
 for i=1:size(T_l,1)
     for j=1:size(T_l,2)
         if isnan(T_l(i,j))==1
@@ -322,6 +344,6 @@ if strcmp(THEEM_model, '2D')
     fprintf('The %s outlet temperature is %1.1f%cC.\n',liquid,T_l_outlet,char(176))
     fprintf('The %s outlet temperature is %1.1f%cC.\n',gas,T_g_outlet,char(176))
     fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_total)
-    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
+    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
 end
