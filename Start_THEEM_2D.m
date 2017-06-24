@@ -81,9 +81,16 @@ function Existing_button_Callback(hObject, eventdata, handles)
 guidata(hObject, handles);
 close(handles.figure1); 
 clc;evalin('base','clear');
-load('THEEM_Input_2D.mat');
+% load('THEEM_Input_2D.mat');
+[FileName,PathName] = uigetfile('*.mat'); %User selects existing input file
+if FileName~=0 %A .mat file needs to be selected
+    
+load([PathName,FileName])
 CTGH_2D(THEEM_model);
 evalin('base','load(''THEEM_Output_2D.mat'')');
+else
+   Start_THEEM_2D %Restarts program if no .mat file is selected
+end
 
 % --- Executes on button press in New_button.
 function New_button_Callback(hObject, eventdata, handles)

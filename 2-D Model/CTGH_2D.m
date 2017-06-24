@@ -274,10 +274,13 @@ for i=1:size(Q,1)
     end
 end
 %This condition is met when all of the new temperatures of the liquid based 
-%on the new temperature-dependent properties are within 0.001 of all of the 
+%on the new temperature-dependent properties are within 0.1% of all of the 
 %corresponding old temperatures based on the old temperature-dependent
 %properties.
-if mean(mean(abs((T_l-T_l_out_old)./T_l)<.01))==1||inlet_prop==5
+test_conv=abs((T_l-T_l_out_old)./T_l); %Matrix of percent difference between old temperature values and new values to test for convergence
+test_conv(isnan(test_conv))=0; %Eliminates NaN values from dividing by zero
+if mean(mean(test_conv<.001))==1||inlet_prop==5
+% if mean(mean(abs((T_l-T_l_out_old)./T_l)<0.01))==1||inlet_prop==5
     break 
 end
 T_l_out_old=T_l; %Current matrix of liquid temperature is now old matrix of liquid temperatures
@@ -296,8 +299,6 @@ h_g_matrix(h_g_matrix==0)=NaN;
 U_avg=sum(sum(U_matrix))/nnz(U_matrix);
 A_total=sum(sum(A_matrix));
 U_matrix(U_matrix==0)=NaN;
-i1_matrix(i1_matrix==0)=NaN;
-j1_matrix(j1_matrix==0)=NaN;
 T_s_in_matrix(T_s_in_matrix==0)=NaN;
 T_s_out_matrix(T_s_out_matrix==0)=NaN;
 for i=1:size(T_l,1)
