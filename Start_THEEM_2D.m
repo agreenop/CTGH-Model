@@ -79,15 +79,25 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
-close(handles.figure1); 
-clc;evalin('base','clear');
-% load('THEEM_Input_2D.mat');
+set(handles.figure1, 'HandleVisibility', 'off'); %Turns off access to GUI. Exempts GUI from next line.
+close all; %Close all open figures except for GUI
+set(handles.figure1, 'HandleVisibility', 'on'); %Turns on access to GUI again.
+clc;evalin('base','clear'); %Clears command window & base workspace
 [FileName,PathName] = uigetfile('*.mat'); %User selects existing input file
+uiresume
+close(handles.figure1); 
 if FileName~=0 %A .mat file needs to be selected
-    
-load([PathName,FileName])
-CTGH_2D(THEEM_model);
-evalin('base','load(''THEEM_Output_2D.mat'')');
+   vars = whos('-file',[PathName,FileName]); %Stores variables from .mat file without loading into workspace
+   mat_size=numel(vars); %Number of variables in mat file
+   if mat_size==25 %Check to see if mat file has the correct number of inputs to run THEEM
+       load([PathName,FileName],'THEEM_model') %Specify which THEEM model is being used, i.e. 2-D vs. 3-D
+       CTGH_2D(THEEM_model);
+       evalin('base','load(''THEEM_Output_2D.mat'')');
+   else %If incorrect input file, will give error and restart program
+       errordlg({'This is not a 2D input file.','Please select another file.'},'Input File Error')
+       uiwait(gcf);
+       Start_THEEM_2D
+   end
 else
    Start_THEEM_2D %Restarts program if no .mat file is selected
 end
@@ -102,9 +112,10 @@ varargout=CTGH_Input_GUI({THEEM_model});
 cancel='Cancel';
 if strcmp(varargout,cancel)==0    
     guidata(hObject, handles);
-    close(handles.figure1);
-    clc;evalin('base','clear');
-    load('THEEM_Input_2D.mat');
+    uiresume
+    close all; %Close all open figures except for GUI
+    clc;evalin('base','clear'); %Clears command window & base workspace
+    load('THEEM_Input_2D.mat','THEEM_model'); 
     CTGH_2D(THEEM_model);
     evalin('base','load(''THEEM_Output_2D.mat'')');
 end
@@ -117,6 +128,7 @@ function Cancel_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % handles.Cancel_program='Cancel';
 guidata(hObject, handles);
+uiresume
 close(handles.figure1); 
 return;
 

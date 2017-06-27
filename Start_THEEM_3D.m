@@ -81,10 +81,28 @@ function Existing_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % handles.Cancel_program='Run';
 guidata(hObject, handles);
+set(handles.figure1, 'HandleVisibility', 'off'); %Turns off access to GUI. Exempts GUI from next line.
+close all; %Close all open figures except for GUI
+set(handles.figure1, 'HandleVisibility', 'on'); %Turns on access to GUI again.
+clc;evalin('base','clear'); %Clears command window & base workspace
+[FileName,PathName] = uigetfile('*.mat'); %User selects existing input file
+uiresume
 close(handles.figure1); 
-clc;evalin('base','clear');
-run('CTGH_3D.m')
-evalin('base','load(''THEEM_Output_3D.mat'')');
+if FileName~=0 %A .mat file needs to be selected
+   vars = whos('-file',[PathName,FileName]); %Stores variables from .mat file without loading into workspace
+   mat_size=numel(vars); %Number of variables in mat file
+   if mat_size==25 %Check to see if mat file has the correct number of inputs to run this THEEM program
+       load([PathName,FileName],'THEEM_model') %Specify which THEEM model is being used, i.e. 2-D vs. 3-D
+       CTGH_3D(THEEM_model);
+       evalin('base','load(''THEEM_Output_3D.mat'')');
+   else %If incorrect input file, will give error and restart program
+       errordlg({'This is not a 3D input file.','Please select another file.'},'Input File Error')
+       uiwait(gcf);
+       Start_THEEM_3D
+   end
+else
+   Start_THEEM_3D %Restarts program if no .mat file is selected
+end
 
 
 
@@ -97,11 +115,12 @@ THEEM_model='3D';
 varargout=CTGH_Input_GUI({THEEM_model});
 cancel='Cancel';
 if strcmp(varargout,cancel)==0 ;
-    % handles.Cancel_program=program;
     guidata(hObject, handles);
-    close(handles.figure1);
-    clc;evalin('base','clear');
-    run('CTGH_3D.m')
+    uiresume
+    close all; %Close all open figures except for GUI
+    clc;evalin('base','clear'); %Clears command window & base workspace
+    load('THEEM_Input_3D.mat','THEEM_model'); 
+    CTGH_3D(THEEM_model);
     evalin('base','load(''THEEM_Output_3D.mat'')');
 end
 
@@ -114,7 +133,8 @@ function Cancel_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % handles.Cancel_program='Cancel';
 guidata(hObject, handles);
-close(handles.figure1); 
+uiresume
+close(handles.figure1);
 return;
 
 

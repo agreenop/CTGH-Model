@@ -1,7 +1,7 @@
 %This program will perform a 3-D simulation on the CTGH and give the
 %overall heat transfer, give a vertical temperature and pressure
 %distribution along the sub-bundles.
-clc;clear;
+function CTGH_3D(THEEM_model)
 load('THEEM_Input_3D.mat');
 %% Liquid Mass Flow Rate Distribution
 i=1; %Allows CTGH_Geom to start
@@ -76,20 +76,19 @@ T_g_store{1}=0;
 P_l_store{1}=0;
 P_g_store{1}=0;
 Q_store{1}=0;
-% for i=2:n+1
-%     [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i),m_g_2_D(i));
-%     T_l_out_store{i}=T_l_out;
-%     T_g_out_store{i}=T_g_out;
-%     P_l_out_store{i}=P_l_out;
-%     P_g_out_store{i}=P_g(size(P_g,1),:);
-%     T_l_store{i}=T_l;
-%     T_g_store{i}=T_g;
-%     P_l_store{i}=P_l;
-%     P_g_store{i}=P_g;
-%     Q_store{i}=Q;
-%     U_store(i)=U_avg;
-%     Area_store(i)=A_total;
-%     epsilon_store(i)=epsilon;
-% end
+for i=2:n+1
+    [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i),m_g_2_D(i));
+    T_l_out_store{i}=T_l_out;
+    T_g_out_store{i}=T_g_out;
+    P_l_out_store{i}=P_l_out;
+    P_g_out_store{i}=P_g(size(P_g,1),:);
+    T_l_store{i}=T_l;
+    T_g_store{i}=T_g;
+    P_l_store{i}=P_l;
+    P_g_store{i}=P_g;
+    Q_store{i}=Q;
+    U_store(i)=U_avg;
+    Area_store(i)=A_total;
+    epsilon_store(i)=epsilon;
+end
 save('3-D Model/THEEM_Output_3D.mat');
-
