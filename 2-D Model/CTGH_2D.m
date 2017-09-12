@@ -104,7 +104,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,THEEM_model);
+       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,T_s_in_matrix,THEEM_model);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -256,7 +256,7 @@ i1=1;
                   P_g(i+1,j)=P_g(i,j);
               else
                 %Calculates gas pressure drop across bank of tubes.  See Eq. 7.61 in Incopera 5th Ed.
-                [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,THEEM_model);
+                [~,~,~,~,u_max_app,rho_g,Re_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,T_s_in_matrix,THEEM_model);
                 [dP_total] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g);
                 P_g(i+1,j)=P_g(i,j)-dP_total;
               end
