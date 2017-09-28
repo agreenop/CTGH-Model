@@ -62,19 +62,19 @@ De_l=Re_l*sqrt(D_in/(D_curv_avg)); %Dean number for liquid through a curved pipe
 Re_c=2300*(1+12*sqrt(D_in/(D_curv_avg))); %Critical reynolds number for a cruved pipe
 if Re_l<=Re_c %Laminar flow
     Nu_l=((3.657+4.343/(1+957/(De_l^2*Pr_l))^2)^3+1.158*(De_l/(1+.477/Pr_l))^(3/2))^(1/3); %Nusselt number for fully developed laminar flow in a curved pipe with uniform wall temp (Manlapaz/Churchill)
-    if De_l<=11.6
-        f_l=64/Re_l; %Friction Factor for laminar flow in pipe
-    elseif De_l>11.6 && De_l<=2000
-         f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
-    elseif De_l>2000
-        f_l=7.0144*sqrt(De_l)/Re_l;
+    if De_l<=20
+        f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^2+De_l/88.33)^(1/2);
+    elseif De_l>20 && De_l<=40
+        f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^1+De_l/88.33)^(1/2);
+    elseif De_l>40
+        f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^0+De_l/88.33)^(1/2);
     end
 elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
    f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
    Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
 elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
-   f_l=.336*(D_in/(2*R_curv))^0.1*Re_l^-0.2; %Friction factor for turbulent flow for smooth curved pipe
-   Nu_l=((f_l/8)*(Re_l-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1)); %Nusselt number for straight pipe with turbulence
+    f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(2*R_curv))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe
+    Nu_l=0.023*Re_l^0.65*De_l^0.2*Pr_l^0.4; %Nusselt number turbulent flow for smooth coiled pipe
 end 
 h_l=k_l*Nu_l/D_in; %Gas heat transfer coefficient
 %% Overall Heat Transfer Coefficient U

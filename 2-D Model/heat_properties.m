@@ -37,12 +37,6 @@ if Re_l<=Re_c %Laminar flow
         f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^1+De_l/88.33)^(1/2);
     elseif De_l>40
         f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^0+De_l/88.33)^(1/2);
-%     if De_l<=11.6
-%         f_l=64/Re_l; %Friction Factor for laminar flow in pipe
-%     elseif De_l>11.6 && De_l<=2000
-%          f_l=(64/Re_l)/(1-(1-(11.6/De_l)^0.45)^2.2);
-%     elseif De_l>2000
-%         f_l=7.0144*sqrt(De_l)/Re_l;
     end
 elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
    f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe

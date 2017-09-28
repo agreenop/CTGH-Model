@@ -12,8 +12,7 @@ function varargout = Start_THEEM_2D(varargin)
 %      Start_THEEM_2D('Property','Value',...) creates a new Start_THEEM_2D or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
 %      applied to the GUI before Start_THEEM_2D_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to Start_THEEM_2D_OpeningFcn via varargin.
+%      unrecognized property name cleard to Start_THEEM_2D_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
