@@ -89,6 +89,8 @@ switch THEEM_model
          set(handles.Bundle_Radius_Units,'Enable','off')
          set(handles.tube_slope,'Enable','off')
          set(handles.heat_rod,'Enable','off')
+     case 'Parametric Study' 
+        set(handles.tube_holders,'Enable','off')
         end
 % UIWAIT makes CTGH_Input_GUI wait for user response (see UIRESUME)
 uiwait(hObject);
@@ -226,6 +228,11 @@ switch THEEM_model
         save('Optimization Program/THEEM_Input_Optimization.mat','gas','liquid',...
             'T_g_in','T_l_in','T_g_out','T_l_out','P_g_in','P_l_in','m_g',...
             'm_l','tube_material')
+    case 'Parametric Study'
+        save('Optimization Program/Parametric Study/THEEM_Input_Parametric.mat','gas','liquid',...
+            'T_g_in','T_l_in','T_g_out','T_l_out','P_g_in','P_l_in','m_g','m_l','tube_material',...
+            'D_out','t','SL','ST','entry','THEEM_model','loops','tube_layer',...
+            'layer_num','bundles','spacers','spacer_width','R_ci','tube_slope','heat_rod')
         end    
 guidata(hObject, handles);
 close(handles.figure1); 

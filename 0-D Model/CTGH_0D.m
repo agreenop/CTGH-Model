@@ -3,9 +3,11 @@
 function CTGH_0D(THEEM_model,i)
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     load('THEEM_Input_0D.mat');
-else %Runs for optimization code.
+elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
     load(fname1);
+else
+    load('THEEM_Input_Parameteric.mat');
 end
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
 T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
@@ -94,16 +96,17 @@ epsilon=Q_tot/Q_max;
 %% Pressure drop across CTGH
 % Gas Pressure Drop
 deltaP_g = StaggeredPressureDrop(ST,SL,u_g_max,rho_g,N_L,Re_g);%Pressure drop across entire tube bundle [bar]
-
 %Salt Pressure Drop
 deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]
 %% Save variables to output files
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     save('0-D Model/THEEM_Output_0D.mat');
-else %Runs for Optimization Code only
+elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     fname2=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
     save(fname2,'tubes','D_curve_outer','H_bank','Area_surf','v_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
     range_output=sprintf('I%d:T%d',i+1,i+1);
     B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
     xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',B,range_output);
+else
+    save('Optimization Program/Parametric Study/THEEM_Output_Parameteric.mat');
 end
