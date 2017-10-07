@@ -92,6 +92,7 @@ if FileName~=0 %A .mat file needs to be selected
    mat_size=numel(vars); %Number of variables in mat file
    if mat_size==26 %Check to see if mat file has the correct number of inputs to run THEEM
        load([PathName,FileName],'THEEM_model') %Specify which THEEM model is being used, i.e. 2-D vs. 3-D
+       copyfile([PathName,FileName],'0-D Model/THEEM_Input_0D.mat')
        CTGH_0D(THEEM_model);
        evalin('base','load(''THEEM_Output_0D.mat'')');
    else %If incorrect input file, will give error and restart program

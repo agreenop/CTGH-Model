@@ -7,7 +7,7 @@ elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
     load(fname1);
 else
-    load('THEEM_Input_Parameteric.mat');
+    load('THEEM_Input_Parametric.mat');
 end
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
 T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]

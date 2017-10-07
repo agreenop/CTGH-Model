@@ -22,7 +22,7 @@ function varargout = Choose_Input_Variable(varargin)
 
 % Edit the above text to modify the response to help Choose_Input_Variable
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 17:51:06
+% Last Modified by GUIDE v2.5 05-Oct-2017 14:16:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,12 +54,13 @@ function Choose_Input_Variable_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for Choose_Input_Variable
 handles.output = hObject;
-
+inputs=fieldnames(load('THEEM_Input_Parametric.mat'));
+set(handles.Variable_selection,'string',inputs)
 % Update handles structure
 guidata(hObject, handles);
 
 % UIWAIT makes Choose_Input_Variable wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -70,7 +71,13 @@ function varargout = Choose_Input_Variable_OutputFcn(hObject, eventdata, handles
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+varargout{1} = handles.input_variable;
+varargout{2} = handles.input_min_value;
+varargout{3} = handles.input_max_value;
+varargout{4} =handles.input_step_value;
+ delete(hObject);
+
+
 
 
 % --- Executes on button press in Cancel_Button.
@@ -78,21 +85,25 @@ function Cancel_Button_Callback(hObject, eventdata, handles)
 % hObject    handle to Cancel_Button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+guidata(hObject, handles);
+uiresume
+close(handles.figure1);
+return;
 
 
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
+% --- Executes on selection change in Variable_selection.
+function Variable_selection_Callback(hObject, eventdata, handles)
+% hObject    handle to Variable_selection (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
+% Hints: contents = cellstr(get(hObject,'String')) returns Variable_selection contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from Variable_selection
 
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
+function Variable_selection_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Variable_selection (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -108,21 +119,30 @@ function Run_Button_Callback(hObject, eventdata, handles)
 % hObject    handle to Run_Button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.input_min_value=str2num(char(get(handles.Min_Value,'String')));
+handles.input_max_value=str2num(char(get(handles.Max_Value,'String')));
+handles.input_step_value=str2num(char(get(handles.Step_Value,'String')));
+input_index=get(handles.Variable_selection,'Value');
+input_variable_list=get(handles.Variable_selection,'String');
+handles.input_variable=char(input_variable_list(input_index));
+uiresume
+guidata(hObject, handles);
+% close(handles.figure1); 
 
 
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function Min_Value_Callback(hObject, eventdata, handles)
+% hObject    handle to Min_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% Hints: get(hObject,'String') returns contents of Min_Value as text
+%        str2double(get(hObject,'String')) returns contents of Min_Value as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function Min_Value_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Min_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -134,18 +154,18 @@ end
 
 
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function Max_Value_Callback(hObject, eventdata, handles)
+% hObject    handle to Max_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% Hints: get(hObject,'String') %returns contents of Max_Value as text
+%        str2double(get(hObject,'String')) returns contents of Max_Value as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function Max_Value_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Max_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -157,18 +177,18 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function Step_Value_Callback(hObject, eventdata, handles)
+% hObject    handle to Step_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% Hints: get(hObject,'String') returns contents of Step_Value as text
+%        str2double(get(hObject,'String')) returns contents of Step_Value as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function Step_Value_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Step_Value (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
