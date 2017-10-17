@@ -133,6 +133,6 @@ fname=sprintf('0-D Model & Optimization Program/Optimization_Files/Inputs/Input%
 save(fname,'m_g','m_l','P_g_in','P_l_in','T_g_in','T_l_in','T_l_out','T_g_out','D_out','t','SL','ST','entry','row_num','tube_row');
 range_input=sprintf('A%d:H%d',i+1,i+1);
 A=[i,D_out/0.0254,t/0.0254,SL,ST,entry,row_num,tube_row];
-xlswrite('0-D Model & Optimization Program/Optimization_Files/Optimization_Results.xlsx',A,range_input);
+xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',A,range_input);
 CTGH_0D(THEEM_model,i)
 end
