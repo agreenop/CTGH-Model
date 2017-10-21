@@ -7,7 +7,7 @@ elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
     load(fname1);
 else
-    load('THEEM_Input_Parametric.mat');
+    load('THEEM_Input_temp_0D.mat');
 end
 T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
 T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
@@ -108,5 +108,5 @@ elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
     xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',B,range_output);
 else
-    save('Optimization Program/Parametric Study/THEEM_Output_Parameteric.mat');
+    save('Optimization Program/Parametric Study/THEEM_Output_temp_0D.mat');
 end

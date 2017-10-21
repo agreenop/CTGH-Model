@@ -5,8 +5,10 @@
 function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,F_factor,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D_exact,m_g_2_D_exact)
 if strcmp(THEEM_model, '3D')
     load('THEEM_Input_3D.mat');
-else
+elseif strcmp(THEEM_model, '2D')
     load('THEEM_Input_2D.mat');
+else
+    load('THEEM_Input_temp_2D.mat');
 end
 i=1;
 [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i);%Establishes geometry of tubes
@@ -331,6 +333,8 @@ P_g_avg_total=(P_g_outlet+P_g_in)/2; %Average gas pressure across CTGH
 T_l_outlet=mean(T_l_out); %Average liquid outlet temperature
 P_l_outlet=mean(P_l_out); %Average liquid outlet pressures
 T_l_avg_total=(T_l_outlet+T_l_in)/2; %Average liquid temperature across CTGH
+deltaP_l=P_l_in-P_l_outlet; %Average liquid pressure drop
+deltaP_g=P_g_in-P_g_outlet; %Average gas pressure drop
 %Bundle effectiveness calculations
 UA_total=U_avg*A_total;
 LMTD=((T_l_in-T_g_outlet)-(T_l_outlet-T_g_in))/log((T_l_in-T_g_outlet)/(T_l_outlet-T_g_in));
@@ -341,13 +345,16 @@ Q_max=C_min*(T_l_in-T_g_in); % Maximum heat transfer possible given inlets
 epsilon=Q_actual/Q_max; %Effectiveness calculation
 F_factor=Q_actual/Q_m; %F factor calculation (Comparison with counterflow heat exchanger)
 if strcmp(THEEM_model, '2D')
-    Q_total=section*bundles*Q_actual; %Assuming all 2-D cross sections are equal in the bundle, this calculates the overall heat transfer in the bundle.
+    Q_tot=section*bundles*Q_actual; %Assuming all 2-D cross sections are equal in the bundle, this calculates the overall heat transfer in the bundle.
     fprintf('The effectiveness of this heat exchanger Is %4.4f.\n',epsilon)
     fprintf('The %s outlet temperature is %1.1f%cC.\n',liquid,T_l_outlet,char(176))
     fprintf('The %s outlet temperature is %1.1f%cC.\n',gas,T_g_outlet,char(176))
-    fprintf('The %s pressure drop is %1.2f bar.\n',liquid,P_l_in-P_l_outlet)
-    fprintf('The %s pressure drop is %1.4f bar.\n',gas,P_g_in-P_g_outlet)
-    fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_total)
+    fprintf('The %s pressure drop is %1.2f bar.\n',liquid,deltaP_l)
+    fprintf('The %s pressure drop is %1.4f bar.\n',gas,deltaP_g)
+    fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_tot)
     CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
+elseif strcmp(THEEM_model, 'Parametric Study')
+    Q_tot=section*bundles*Q_actual; %Assuming all 2-D cross sections are equal in the bundle, this calculates the overall heat transfer in the bundle.
+    save('Optimization Program/Parametric Study/THEEM_Output_temp_2D.mat')
 end

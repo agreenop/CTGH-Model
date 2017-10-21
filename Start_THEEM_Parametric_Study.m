@@ -90,7 +90,7 @@ close(handles.figure1);
 if FileName~=0 %A .mat file needs to be selected
    vars = whos('-file',[PathName,FileName]); %Stores variables from .mat file without loading into workspace
    mat_size=numel(vars); %Number of variables in mat file
-   if mat_size==26 %Check to see if mat file has the correct number of inputs to run THEEM
+   if mat_size==27 %Check to see if mat file has the correct number of inputs to run THEEM
        load([PathName,FileName],'THEEM_model') %Specify which THEEM model is being used, i.e. 2-D vs. 3-D
        copyfile([PathName,FileName],'Optimization Program/Parametric Study/THEEM_Input_Parametric.mat')
        CTGH_Parametric_Study(THEEM_model)
@@ -121,7 +121,7 @@ if strcmp(varargout,cancel)==0
     close all; %Close all open figures except for GUI
     clc;evalin('base','clear'); %Clears command window & base workspace
     load('THEEM_Input_Parametric.mat','THEEM_model'); 
-    CTGH_Parametric_Study(THEEM_model);
+    CTGH_Parametric_Study;
 %     evalin('base','load(''THEEM_Output_Parametric.mat'')');
 end
 
