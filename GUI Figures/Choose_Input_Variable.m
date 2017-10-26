@@ -22,7 +22,7 @@ function varargout = Choose_Input_Variable(varargin)
 
 % Edit the above text to modify the response to help Choose_Input_Variable
 
-% Last Modified by GUIDE v2.5 05-Oct-2017 14:16:35
+% Last Modified by GUIDE v2.5 26-Oct-2017 16:22:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,7 +54,9 @@ function Choose_Input_Variable_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for Choose_Input_Variable
 handles.output = hObject;
-inputs=fieldnames(load('THEEM_Input_Parametric.mat'));
+handles.Cancel_program=char('True');
+% inputs=fieldnames(load('THEEM_Input_Parametric.mat'));
+inputs=varargin{1};
 set(handles.Variable_selection,'string',inputs)
 % Update handles structure
 guidata(hObject, handles);
@@ -71,10 +73,18 @@ function varargout = Choose_Input_Variable_OutputFcn(hObject, eventdata, handles
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.input_variable;
-varargout{2} = handles.input_min_value;
-varargout{3} = handles.input_max_value;
-varargout{4} =handles.input_step_value;
+varargout{1} = handles.Cancel_program;
+if exist('handles.input_variable')~=0 %Checks to see if user selected a variable
+    varargout{2} = handles.input_variable;
+    varargout{3} = handles.input_min_value;
+    varargout{4} = handles.input_max_value;
+    varargout{5} = handles.input_step_value;
+else
+    varargout{2} = [];
+    varargout{3} = [];
+    varargout{4} = [];
+    varargout{5} = [];
+end
  delete(hObject);
 
 
@@ -85,10 +95,9 @@ function Cancel_Button_Callback(hObject, eventdata, handles)
 % hObject    handle to Cancel_Button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-guidata(hObject, handles);
 uiresume
-close(handles.figure1);
-return;
+guidata(hObject, handles);
+
 
 
 % --- Executes on selection change in Variable_selection.
@@ -125,9 +134,9 @@ handles.input_step_value=str2num(char(get(handles.Step_Value,'String')));
 input_index=get(handles.Variable_selection,'Value');
 input_variable_list=get(handles.Variable_selection,'String');
 handles.input_variable=char(input_variable_list(input_index));
+handles.Cancel_program=char('False');
 uiresume
-guidata(hObject, handles);
-% close(handles.figure1); 
+guidata(hObject, handles); 
 
 
 
@@ -196,4 +205,21 @@ function Step_Value_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+% delete(hObject);
+if isequal(get(hObject, 'waitstatus'), 'waiting')
+    % The GUI is still in UIWAIT, call UIRESUME
+    uiresume(hObject);
+else
+    % The GUI is no longer waiting, just close it
+    delete(hObject);
 end

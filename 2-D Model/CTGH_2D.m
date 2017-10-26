@@ -49,7 +49,10 @@ for j=1:size(T_g,2)
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
 end
 BC_g=nnz(T_g);%Number of 'cool' gas entry points into CTGH
-for j=1:round(size(Q,2)/entry):size(Q,2)
+% entry_step=round(size(Q,2)/entry); %Establishes the number of azimuthal elements that should be between each liquid manifold. Round forces it to be an integer.
+entry_step=round(size(Q,2)/entry);%Establishes the number of azimuthal elements that should be between each liquid manifold. Round forces it to be an integer.
+max_entry=size(Q,2)+2-entry_step; %Prevents the code from establishing n+1 entry points.  Add 1 to make the 1st point equal to total+1.  Add another 1 to account for round functioning rounding up instead of down.
+for j=1:entry_step:max_entry
     T_l(size(T_l,1),j)=T_l_in; %Coolant inlet temperatures at manifold entry points
     P_l(size(T_l,1),j)=P_l_in; %Coolant inlet pressure at manifold entry points
 end
@@ -65,7 +68,7 @@ A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q))
 B=zeros(size(A,1),1);
 count=0; %Count that tracks the number of equations used
 entry_number=1; %Tracks which entry point/loop that i currently being calculated
-for j_entry=1:round(size(Q,2)/entry):size(Q,2) %Equally distributes entry points
+for j_entry=1:entry_step:max_entry %Equally distributes entry points
  i=size(Q,1); %Starts loop at outer row
  count_move=2; %Counts spaces until next entry point
 while i>0
@@ -282,7 +285,6 @@ end
 test_conv=abs((T_l-T_l_out_old)./T_l); %Matrix of percent difference between old temperature values and new values to test for convergence
 test_conv(isnan(test_conv))=0; %Eliminates NaN values from dividing by zero
 if mean(mean(test_conv<.001))==1||inlet_prop==5
-% if mean(mean(abs((T_l-T_l_out_old)./T_l)<0.01))==1||inlet_prop==5
     break 
 end
 T_l_out_old=T_l; %Current matrix of liquid temperature is now old matrix of liquid temperatures

@@ -5,8 +5,10 @@
 function [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,T_s_in_matrix,THEEM_model)
 if strcmp(THEEM_model, '3D')
     load('THEEM_Input_3D.mat');
-else
+elseif strcmp(THEEM_model, '2D')
     load('THEEM_Input_2D.mat');
+else
+    load('THEEM_Input_temp_2D.mat');
 end
 if inlet_prop==1 %First time, properties will be calculated at inlet temperatures and pressures
     T_l_avg=T_l_in;
@@ -44,8 +46,6 @@ elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
 elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
     f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(2*R_curv))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe
     Nu_l=0.023*Re_l^0.65*De_l^0.2*Pr_l^0.4; %Nusselt number turbulent flow for smooth coiled pipe
-%    f_l=.336*(D_in/(2*R_curv))^0.1*Re_l^-0.2; %Friction factor for turbulent flow for smooth curved pipe
-%    Nu_l=((f_l/8)*(Re_l-1000)*Pr_l)/(1+12.7*(f_l/8)^0.5*(Pr_l^(2/3)-1)); %Nusselt number for straight pipe with turbulence
 end    
 h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient 
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes

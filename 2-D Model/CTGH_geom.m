@@ -4,8 +4,10 @@ function [L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_g
 %% Input CTGH Geometry Parameters
 if strcmp(THEEM_model, '3D')
     load('THEEM_Input_3D.mat');
-else
+elseif strcmp(THEEM_model, '2D')
     load('THEEM_Input_2D.mat');
+else
+    load('THEEM_Input_temp_2D.mat');
 end
 %% Calculated CTGH Geometry Parameters
 tubes_manifold=layer_num*(tube_layer-heat_rod); %Number of tubes per manifold per sub-bundle

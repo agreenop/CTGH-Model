@@ -75,7 +75,8 @@ elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
    f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
    Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
 elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
-    f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(2*R_curv))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe
+    Pr_si=Pr_l; %For 0D model, surface Prandtl number is approximately equal to bulk Prandtl number
+    f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(D_curv_avg))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe
     Nu_l=0.023*Re_l^0.65*De_l^0.2*Pr_l^0.4; %Nusselt number turbulent flow for smooth coiled pipe
 end 
 h_l=k_l*Nu_l/D_in; %Gas heat transfer coefficient
