@@ -74,7 +74,7 @@ function varargout = Choose_Input_Variable_OutputFcn(hObject, eventdata, handles
 
 % Get default command line output from handles structure
 varargout{1} = handles.Cancel_program;
-if exist('handles.input_variable')~=0 %Checks to see if user selected a variable
+if isfield(handles, 'input_variable')~=0 %Checks to see if user selected a variable
     varargout{2} = handles.input_variable;
     varargout{3} = handles.input_min_value;
     varargout{4} = handles.input_max_value;
