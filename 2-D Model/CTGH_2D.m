@@ -43,13 +43,17 @@ else % For 2-D calculations, averages flow rates across bundles
 end
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
 m_l_t=m_l_vol/(tubes_vol); %Mass flow of coolant per tube assuming even distribution
-m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume
+% m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume
+gaps_position=zeros(1,spacers);
+for gap=1:spacers %Start the count for tie rod gaps
+    gaps_position(gap)=size(Q,1)-(vol_cells_gap-1)-(gap-1)*(1+vol_cells_gap);%Radial locations of volumes adjacent to tie rod gaps
+end
+m_g_vol=porous_media_approx(Q); %External function determines isothermal gas flow using a porous media approximation
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
 end
 BC_g=nnz(T_g);%Number of 'cool' gas entry points into CTGH
-% entry_step=round(size(Q,2)/entry); %Establishes the number of azimuthal elements that should be between each liquid manifold. Round forces it to be an integer.
 entry_step=round(size(Q,2)/entry);%Establishes the number of azimuthal elements that should be between each liquid manifold. Round forces it to be an integer.
 max_entry=size(Q,2)+2-entry_step; %Prevents the code from establishing n+1 entry points.  Add 1 to make the 1st point equal to total+1.  Add another 1 to account for round functioning rounding up instead of down.
 for j=1:entry_step:max_entry
@@ -59,10 +63,6 @@ end
 BC_l=nnz(T_l); %Number of 'hot' coolant entry points into CTGH
 inlet_prop=1; %Determines which temperature heat properties are taken at for liquid and gas.
 T_l_out_old=zeros(size(T_l,1),size(T_l,2));
-gaps_position=zeros(1,spacers);
-for gap=1:spacers %Start the count for tie rod gaps
-    gaps_position(gap)=size(Q,1)-(vol_cells_gap-1)-(gap-1)*(1+vol_cells_gap);%Radial locations of volumes adjacent to tie rod gaps
-end
 while (1) %Starts process assuming constant heat transfer properties throughout system. Repeats using properties based on average temperature and pressure of volume cell.
 A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q));
 B=zeros(size(A,1),1);
@@ -135,17 +135,17 @@ while i>0
        end
        %EQ2: 0=m_g_vol*Cp_g*(T_g(i+1,j)-T_g(i,j))-Q(i,j);
        count=count+1; %Tracks number of equations
-       A(count,g1)=-m_g_vol*Cp_g; 
-       A(count,g2)=m_g_vol*Cp_g;
+       A(count,g1)=-m_g_vol(i,j)*Cp_g; 
+       A(count,g2)=m_g_vol(i,j)*Cp_g;
        A(count,q1)=-1;
        %If one of the temperatures is a known value, this section moves it
        %to the solution matrix, B.
         if T_g(i,j)==T_g_in
            A(count,g1)=0;
-           B(count)=T_g(i,j)*m_g_vol*Cp_g;
+           B(count)=T_g(i,j)*m_g_vol(i,j)*Cp_g;
        elseif T_g(i+1,j)==T_g_in
            A(count,g2)=0;
-           B(count)=-T_g(i+1,j)*m_g_vol*Cp_g;
+           B(count)=-T_g(i+1,j)*m_g_vol(i,j)*Cp_g;
         end
        %EQ3: 0=UA*((T_l(i,j+1)+T_l(i,j))/2-(T_g(i+1,j)+T_g(i,j))/2)-Q(i,j);
        count=count+1; %Tracks number of equations
@@ -186,8 +186,8 @@ while i>0
            g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
-           B(count)=m_g_vol*Cp_g*T_g(i1,j1); 
-           A(count,g2)=m_g_vol*Cp_g;
+           B(count)=m_g_vol(i,j)*Cp_g*T_g(i1,j1); 
+           A(count,g2)=m_g_vol(i,j)*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature position of this loop in azimuthal direction
            entry_number=entry_number+1; %Moves counter to next loop.
@@ -198,8 +198,8 @@ while i>0
            g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
-           B(count)=m_g_vol*Cp_g*T_g(i1,j1);
-           A(count,g2)=m_g_vol*Cp_g;
+           B(count)=m_g_vol(i,j)*Cp_g*T_g(i1,j1);
+           A(count,g2)=m_g_vol(i,j)*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature of this loop
            entry_number=entry_number+1; %Moves counter to next loop.

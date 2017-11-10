@@ -51,7 +51,7 @@ h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes
 R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes
 %Air flow across cross flow tubes. 
-u_app_g=m_g_vol/(rho_g*H*L); %Approach velocity of gas
+u_app_g=m_g_vol(i,j)/(rho_g*H*L); %Approach velocity of gas
 u_max_app=max((ST/(ST-1))*u_app_g,(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))*u_app_g); %Max velocity of gas/ velocity of gas between tubes
 Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocity
 N_L_list=[1,2,3,4,5,7,10,13,16,20];
