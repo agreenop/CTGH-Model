@@ -40,9 +40,9 @@ if Re_l<=Re_c %Laminar flow
     elseif De_l>40
         f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^0+De_l/88.33)^(1/2);
     end
-elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
-   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
-   Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
+% elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
+%    f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
+%    Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
 elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
     f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(2*R_curv))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe
     Nu_l=0.023*Re_l^0.65*De_l^0.2*Pr_l^0.4; %Nusselt number turbulent flow for smooth coiled pipe
@@ -51,7 +51,7 @@ h_l=k_l*Nu_l/D_in; %Liquid heat transfer coefficient
 R_l=1/(tubes_vol*pi*D_in*L*h_l); %Liquid thermal resistance for pipes
 R_t=log(D_out/D_in)/(2*pi*tubes_vol*k_t*L); %Metal thermal resistance for pipes
 %Air flow across cross flow tubes. 
-u_app_g=m_g_vol(i,j)/(rho_g*H*L); %Approach velocity of gas
+u_app_g=m_g_vol/(rho_g*H*L); %Approach velocity of gas
 u_max_app=max((ST/(ST-1))*u_app_g,(ST/(2*(sqrt(SL^2+(ST/2)^2)-1)))*u_app_g); %Max velocity of gas/ velocity of gas between tubes
 Re_g=D_out*u_max_app*rho_g/(mu_g); %Reynolds number for gas based on max velocity
 N_L_list=[1,2,3,4,5,7,10,13,16,20];

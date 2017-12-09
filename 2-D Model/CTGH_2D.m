@@ -43,12 +43,12 @@ else % For 2-D calculations, averages flow rates across bundles
 end
 m_l_vol=m_l_2_D/(entry);%Mass flow of liquid through all tubes per volume
 m_l_t=m_l_vol/(tubes_vol); %Mass flow of coolant per tube assuming even distribution
-% m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume
+m_g_vol=m_g_2_D/(size(Q,2)); %Mass flow of gas per volume
 gaps_position=zeros(1,spacers);
 for gap=1:spacers %Start the count for tie rod gaps
     gaps_position(gap)=size(Q,1)-(vol_cells_gap-1)-(gap-1)*(1+vol_cells_gap);%Radial locations of volumes adjacent to tie rod gaps
 end
-m_g_vol=porous_media_approx(Q); %External function determines isothermal gas flow using a porous media approximation
+% m_g_vol=porous_media_approx(m_g_2_D,T_g,slice_holder,slice_total,gaps_position,tube_holders); %External function determines isothermal gas flow using a porous media approximation
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
@@ -135,17 +135,17 @@ while i>0
        end
        %EQ2: 0=m_g_vol*Cp_g*(T_g(i+1,j)-T_g(i,j))-Q(i,j);
        count=count+1; %Tracks number of equations
-       A(count,g1)=-m_g_vol(i,j)*Cp_g; 
-       A(count,g2)=m_g_vol(i,j)*Cp_g;
+       A(count,g1)=-m_g_vol*Cp_g; 
+       A(count,g2)=m_g_vol*Cp_g;
        A(count,q1)=-1;
        %If one of the temperatures is a known value, this section moves it
        %to the solution matrix, B.
         if T_g(i,j)==T_g_in
            A(count,g1)=0;
-           B(count)=T_g(i,j)*m_g_vol(i,j)*Cp_g;
+           B(count)=T_g(i,j)*m_g_vol*Cp_g;
        elseif T_g(i+1,j)==T_g_in
            A(count,g2)=0;
-           B(count)=-T_g(i+1,j)*m_g_vol(i,j)*Cp_g;
+           B(count)=-T_g(i+1,j)*m_g_vol*Cp_g;
         end
        %EQ3: 0=UA*((T_l(i,j+1)+T_l(i,j))/2-(T_g(i+1,j)+T_g(i,j))/2)-Q(i,j);
        count=count+1; %Tracks number of equations
@@ -186,8 +186,8 @@ while i>0
            g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
-           B(count)=m_g_vol(i,j)*Cp_g*T_g(i1,j1); 
-           A(count,g2)=m_g_vol(i,j)*Cp_g;
+           B(count)=m_g_vol*Cp_g*T_g(i1,j1); 
+           A(count,g2)=m_g_vol*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature position of this loop in azimuthal direction
            entry_number=entry_number+1; %Moves counter to next loop.
@@ -198,8 +198,8 @@ while i>0
            g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
-           B(count)=m_g_vol(i,j)*Cp_g*T_g(i1,j1);
-           A(count,g2)=m_g_vol(i,j)*Cp_g;
+           B(count)=m_g_vol*Cp_g*T_g(i1,j1);
+           A(count,g2)=m_g_vol*Cp_g;
            A(count,q1)=-1;
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature of this loop
            entry_number=entry_number+1; %Moves counter to next loop.
@@ -354,7 +354,7 @@ if strcmp(THEEM_model, '2D')
     fprintf('The %s pressure drop is %1.2f bar.\n',liquid,deltaP_l)
     fprintf('The %s pressure drop is %1.4f bar.\n',gas,deltaP_g)
     fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_tot)
-    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
+%     CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
 elseif strcmp(THEEM_model, 'Parametric Study')
     Q_tot=section*bundles*Q_actual; %Assuming all 2-D cross sections are equal in the bundle, this calculates the overall heat transfer in the bundle.

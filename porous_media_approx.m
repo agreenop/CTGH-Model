@@ -4,15 +4,8 @@
 %azimuthal flow is a fraction of the radial flow, which is the primary
 %direction of flow (v=k*u where k<1).  For simplicity the flow is assumed
 %isothermal for distrubtion.
-function m_g_vol=porous_media_approx(m_g_2_D,T_g,slice_holder,slice_total,gaps_position,THEEM_model)
-if strcmp(THEEM_model, '3D')
-    load('THEEM_Input_3D.mat');
-elseif strcmp(THEEM_model, '2D')
-    load('THEEM_Input_2D.mat');
-else
-    load('THEEM_Input_temp_2D.mat');
-end
-k_perm=0.01; %Ratio of azimuthal permeability to radial permeability
+function m_g_vol=porous_media_approx(m_g_2_D,T_g,slice_holder,slice_total,gaps_position,tube_holders)
+k_perm=0.05; %Ratio of azimuthal permeability to radial permeability
 % k_perm_gap=10; %Ratio of permeability of gap to tube bundle
 m_g_vol=zeros(size(T_g)); %Initialize mass flow matrix
 m_g_vol(1,:)=m_g_2_D/(size(m_g_vol,2)); %Evenly distribute flow initially between each volume at the inside of the annulus
@@ -38,7 +31,7 @@ for slice=1:tube_holders %Look at each slice.  (Tube holders prevent gas from mi
         if any(i==gaps_position)
             vol_collect=zeros(size(gap_matrix,1),1);
             for gap_collect=1:size(gap_matrix,1)
-                vol_collect(gap_collect)=m_g_vol(gap_matrix(gap_collect,slice),i);
+                vol_collect(gap_collect)=m_g_vol(i,gap_matrix(gap_collect,slice));
             end
             m_g_avg=mean(vol_collect);
             for j=gap_matrix(1,slice):gap_matrix(size(gap_matrix,1),slice)
