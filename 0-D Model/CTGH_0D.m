@@ -103,11 +103,11 @@ deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundl
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     save('0-D Model/THEEM_Output_0D.mat');
 elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
-    fname2=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
-    save(fname2,'tubes','D_curve_outer','H_bank','Area_surf','v_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
-    range_output=sprintf('I%d:T%d',i+1,i+1);
+    output_name=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
+    save(output_name,'tubes','D_curve_outer','H_bank','Area_surf','u_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
+    range_output=sprintf('L%d:W%d',i+1,i+1);
     B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
-    xlswrite('Optimization Program/Optimization_Files/Optimization_Results.xlsx',B,range_output);
+    xlswrite(results_location,B,range_output);
 else
     save('Optimization Program/Parametric Study/THEEM_Output_temp_0D.mat');
 end
