@@ -354,7 +354,7 @@ if strcmp(THEEM_model, '2D')
     fprintf('The %s pressure drop is %1.2f bar.\n',liquid,deltaP_l)
     fprintf('The %s pressure drop is %1.4f bar.\n',gas,deltaP_g)
     fprintf('The estimated overall heat transfer is %1.3e W.\n',Q_tot)
-%     CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
+    CTGH_plot(T_l,T_g,Q,P_l,P_g,UA_matrix,Re_g_matrix,h_g_matrix,h_l_matrix,Re_l_matrix,U_matrix,T_s_in_matrix,T_s_out_matrix,gas,liquid,R_ci,vol_cells_gap,vol_wid,spacer_width) %Plots the values
     save('2-D Model/THEEM_Output_2D.mat');
 elseif strcmp(THEEM_model, 'Parametric Study')
     Q_tot=section*bundles*Q_actual; %Assuming all 2-D cross sections are equal in the bundle, this calculates the overall heat transfer in the bundle.
