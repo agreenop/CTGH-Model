@@ -30,7 +30,7 @@ end
 %This next part finds UA.
 Re_l=4*m_l_t/(pi*D_in*mu_l); %Reynolds number for liquid
 De_l=Re_l*sqrt(D_in/(2*R_curv)); %Dean number for liquid through a curved pipe
-Re_c=2300*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe
+Re_c=2100*(1+12*sqrt(D_in/(2*R_curv))); %Critical reynolds number for a cruved pipe
 if Re_l<=Re_c %Laminar flow
     Nu_l=((3.657+4.343/(1+957/(De_l^2*Pr_l))^2)^3+1.158*(De_l/(1+.477/Pr_l))^(3/2))^(1/3); %Nusselt number for fully developed laminar flow in a curved pipe with uniform wall temp (Manlapaz/Churchill)
     if De_l<=20
