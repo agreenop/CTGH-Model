@@ -19,7 +19,7 @@
 
 % These are valid for Reynolds numbers between 2E3 and 2E6 %
 % THEEM modifications: Eliminated unneccessary variables, changed to THEEM variables, and added interpolation for exact ratio. 
-function [dP_total] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g)
+function [dP_total,Eu] = StaggeredPressureDrop(ST,SL,u_max_app,rho_g,N_L,Re_g)
 x = double((ST)./(SL));      %Used for correction factor k_1 which I don't have data for.
 
 % Coefficients, c_i, to generate pressure drop coefficients for equilateral triangle banks.
