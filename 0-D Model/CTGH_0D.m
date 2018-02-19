@@ -3,15 +3,24 @@
 function CTGH_0D(THEEM_model,i)
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     load('THEEM_Input_0D.mat');
+    T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
+    T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
+    LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
 elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
     load(fname1);
-else
+    T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
+    T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
+    LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
+elseif strcmp(THEEM_model,'Parametric Study') %Runs for Parametric Study
     load('THEEM_Input_temp_0D.mat');
+    T_g_avg=T_g_in;
+    T_l_avg=T_l_in;
+elseif strcmp(THEEM_model,'3D') %Runs for 3-D model
+    load('THEEM_Input_3D.mat'); 
+    T_g_avg=T_g_in;
+    T_l_avg=T_l_in;  
 end
-T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
-T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
-LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
 %% Thermodynamic Properties
 [Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_in);
 Vol_flow_g=m_g/rho_g; %Volumetric flow rate of gas [m^3/s]
@@ -26,8 +35,8 @@ tubes=entry*tubes_manifold*bundles; %Total number of tubes in CTGH
 bank_depth=N_L*SL*D_out+spacers*spacer_width; %Depth of tube bank based on tubes, tube spacing, and spacer gaps [m]
 D_curve_outer=D_curve_inner+2*bank_depth; %Average tube bundle outside diameter [m]
 D_curv_avg=(D_curve_outer+D_curve_inner)/2; %Diameter of the middle of the tube bundle [m]
-H=D_out*ST*((layer_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
-H_bank=(H+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
+H_sub=D_out*ST*((layer_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
+H_bank=(H_sub+disk_thick)*bundles; %Height of entire tube bank, including spacer disk [m]
 Area_avg=pi*D_curv_avg*(H_bank-disk_thick*bundles); %Average/Middle of bundle cross sectional area
 L_tube=loops*pi*D_curv_avg; %Average length of each tube in bundle
 Area_surf=pi*D_out*L_tube*tubes; %Surface area of tubes, based on outside diameter
@@ -85,15 +94,6 @@ R_g=1/h_g; %Gas thermal resistance based on outer diameter
 R_t=log(D_out/D_in)*D_out/(2*k_t); %Metal thermal resistance for pipes based on outer diameter
 R_l=(D_out/D_in)*1/h_l; %Liquid thermal resistance for pipes based on outer diameter
 U=1/(R_g+R_t+R_l); %Overall heat transfer coefficient [W/m^2*K] based on outer diameter
-%% Surface Area and Tube Requirements
-Q_tot=m_g*Cp_g*(T_g_out-T_g_in)/10^6; %Gas thermal power [MW]
-A_ideal=Q_tot*10^6/(U*LMTD); %Ideal (F=1) surface area based on outer diameter[m^2]
-F=A_ideal/Area_surf; %Reguired F factor needed to obtain heat transfer, Q_tot
-L_ideal=A_ideal/(pi*D_out); %Ideal total tube length
-tubes_ideal=round(L_ideal/L_tube,0); %Estimated ideal number of tubes, assuming average tube length
-C_min=min(m_g*Cp_g,m_l*Cp_l);
-Q_max=C_min*(T_l_in-T_g_in)/10^6;
-epsilon=Q_tot/Q_max;
 %% Pressure drop across CTGH
 % Gas Pressure Drop
 deltaP_g = StaggeredPressureDrop(ST,SL,u_g_max,rho_g,N_L,Re_g);%Pressure drop across entire tube bundle [bar]
@@ -101,6 +101,15 @@ deltaP_g = StaggeredPressureDrop(ST,SL,u_g_max,rho_g,N_L,Re_g);%Pressure drop ac
 deltaP_l=1/2*f_l*rho_l*L_tube*v_l^2/D_in*10^-5; %Salt pressure drop across bundle [bar]
 %% Save variables to output files
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
+    %% Surface Area and Tube Requirements
+    Q_tot=m_g*Cp_g*(T_g_out-T_g_in)/10^6; %Gas thermal power [MW]
+    A_ideal=Q_tot*10^6/(U*LMTD); %Ideal (F=1) surface area based on outer diameter[m^2]
+    F=A_ideal/Area_surf; %Reguired F factor needed to obtain heat transfer, Q_tot
+    L_ideal=A_ideal/(pi*D_out); %Ideal total tube length
+    tubes_ideal=round(L_ideal/L_tube,0); %Estimated ideal number of tubes, assuming average tube length
+    C_min=min(m_g*Cp_g,m_l*Cp_l);
+    Q_max=C_min*(T_l_in-T_g_in)/10^6;
+    epsilon=Q_tot/Q_max;
     save('0-D Model/THEEM_Output_0D.mat');
 elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     output_name=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
@@ -108,6 +117,8 @@ elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     range_output=sprintf('L%d:W%d',i+1,i+1);
     B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
     xlswrite(results_location,B,range_output);
-else
+elseif strcmp(THEEM_model,'Parametric Study') %Runs for Parametric Study
     save('Optimization Program/Parametric Study/THEEM_Output_temp_0D.mat');
+elseif strcmp(THEEM_model, '3D') %Runs for 3-D Model
+    save('3-D Model/THEEM_Output_temp_0D.mat');
 end

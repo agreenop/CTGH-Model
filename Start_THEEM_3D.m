@@ -97,7 +97,7 @@ if FileName~=0 %A .mat file needs to be selected
        if compare==0 %If file is existing .mat file in folder, program does not copy it.  It just uses it.
        copyfile([PathName,FileName],'3-D Model\THEEM_Input_3D.mat')
        end
-       CTGH_3D(THEEM_model);
+       CTGH_3D;
        evalin('base','load(''THEEM_Output_3D.mat'')');
    else %If incorrect input file, will give error and restart program
        errordlg({'This is not a 3D input file.','Please select another file.'},'Input File Error')
@@ -123,8 +123,7 @@ if strcmp(varargout,cancel)==0 ;
     uiresume
     close all; %Close all open figures except for GUI
     clc;evalin('base','clear'); %Clears command window & base workspace
-    load('THEEM_Input_3D.mat','THEEM_model'); 
-    CTGH_3D(THEEM_model);
+    CTGH_3D;
     evalin('base','load(''THEEM_Output_3D.mat'')');
 end
 

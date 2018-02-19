@@ -2,16 +2,31 @@ clc;clear;
 load('THEEM_Output_3D.mat');
 %% Plot liquid manifold flow distribution
 figure(1)
-plot(X(2:n+1),entry*m_l_2_D(2:n+1)) %Individual port flow rates distribution over manifolds
+plot(X(2:n+1),m_l_2_D(2:n+1)) %Individual port flow rates distribution over manifolds
 hold on
 plot([0,X(n+1)],[m_l/n,m_l/n]) %Average port flow rate
 hold off
-title('Port Mass Flow Rate Distribution Along Manifold')
+title('Liquid Port Mass Flow Rate Distribution Along Manifold')
 xlabel('Distance from Manifold Inlet (m)')
-ylabel('Port Mass Flow Rates (kg/s)')
-legend('Calculated Mass Flow Rates','Average Mass Flow Rate')
+ylabel('Liquid Port Mass Flow Rates (kg/s)')
+legend('Calculated Mass Flow Rates','Average Mass Flow Rate','Location','northwest')
 figure(2)
-plot(X,m_l_manifold) %Manifold flow rate
+plot(X,entry*m_l_manifold) %Manifold flow rate
+title('Manifold Mass Flow Rate Distribution')
+xlabel('Distance from Manifold Inlet (m)')
+ylabel('Manifold Mass Flow Rates (kg/s)')
+%% Plot gas manifold flow distribution
+figure(3)
+plot(Y(2:n+1),m_g_2_D(2:n+1)) %Individual port flow rates distribution over manifolds
+hold on
+plot([0,Y(n+1)],[m_g/n,m_g/n]) %Average port flow rate
+hold off
+title('Gas Port Mass Flow Rate Distribution Along Manifold')
+xlabel('Distance from Manifold Inlet (m)')
+ylabel('Gas Port Mass Flow Rates (kg/s)')
+legend('Calculated Mass Flow Rates','Average Mass Flow Rate','Location','northwest')
+figure(4)
+plot(Y,m_g_center_bund) %Manifold flow rate
 title('Manifold Mass Flow Rate Distribution')
 xlabel('Distance from Manifold Inlet (m)')
 ylabel('Manifold Mass Flow Rates (kg/s)')
@@ -29,7 +44,7 @@ for x=2:size(T_l_out_store,1)
     P_g_out_avg(x-1)=mean(P_g_out_store{x});
     Q_sum(x-1)=sum(nansum(Q_store{x-1}));
 end
-figure(3)
+figure(5)
 hold on
 plot(X(2:size(X,2)),T_l_out_avg) %Manifold flow rate
 plot([X(2),X(size(X,2))],[T_l_in,T_l_in])
@@ -39,7 +54,7 @@ title([liquid ' Outlet Temperature Distribution'])
 xlabel('Distance from Manifold Inlet (m)')
 ylim([500,720])
 ylabel([liquid 'Temperature (\circC)'])
-figure(4)
+figure(6)
 hold on
 plot(X(2:size(X,2)),T_g_out_avg) %Manifold flow rate
 plot([X(2),X(size(X,2))],[T_g_in,T_g_in])
@@ -57,13 +72,13 @@ P_g_out_mean=mean(P_g_out_avg);
 T_l_avg=(T_l_out_mean+T_l_in)/2;
 T_g_avg=(T_g_out_mean+T_g_in)/2;
 P_g_avg=(P_g_out_mean+P_g_in)/2;
-[Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_in);
-C_min=min(m_g*Cp_g,m_l*Cp_l);
-Q_max=C_min*(T_l_in-T_g_in);
-Q_total=sum(Q_sum);
-e1=Q_total/Q_max;
-LMTD_tot=((T_l_in-T_g_out_mean)-(T_l_out_mean-T_g_in))/log((T_l_in-T_g_out_mean)/(T_l_out_mean-T_g_in));
-F_factor=Q_total/(U_mean*Area_tot*LMTD_tot);
+% [Cp_l,Cp_g,mu_l,k_l,rho_l,Pr_l,rho_g,mu_g,k_g,Pr_g,k_t]=Material_prop(liquid,gas,tube_material,T_l_avg,T_g_avg,P_g_in);
+% C_min=min(m_g*Cp_g,m_l*Cp_l);
+% Q_max=C_min*(T_l_in-T_g_in);
+% Q_total=sum(Q_sum);
+% e1=Q_total/Q_max;
+% LMTD_tot=((T_l_in-T_g_out_mean)-(T_l_out_mean-T_g_in))/log((T_l_in-T_g_out_mean)/(T_l_out_mean-T_g_in));
+% F_factor=Q_total/(U_mean*Area_tot*LMTD_tot);
 %% Plot liquid manifold flow distribution in 3-D
 % y=R_curv:D_manifold/10:R_curv+D_manifold;
 % y3=-D_manifold/2:D_manifold/10:D_manifold/2;

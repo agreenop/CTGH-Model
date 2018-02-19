@@ -2,7 +2,7 @@
 %assuming the gas is only flowing in the radial direction.  For grid layout,
 %see Solidworks model.
 %Andrew Greenop June 22, 2015
-function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,F_factor,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D_exact,m_g_2_D_exact)
+function [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,F_factor,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D_exact,m_g_2_D_exact,P_l_in_exact,P_g_inlet_exact)
 if strcmp(THEEM_model, '3D')
     load('THEEM_Input_3D.mat');
 elseif strcmp(THEEM_model, '2D')
@@ -37,6 +37,8 @@ P_l_out=zeros(entry,1); %Matrix of outlet pressures for liquid
 if strcmp(THEEM_model, '3D') %For 3-D calculations, calculates for each bundle
     m_l_2_D=m_l_2_D_exact; %Mass flow split between 36 bundles, which are split into 4 each
     m_g_2_D=m_g_2_D_exact;
+    P_l_in=P_l_in_exact;
+    P_g_in=P_g_inlet_exact;
 else % For 2-D calculations, averages flow rates across bundles
     m_l_2_D=m_l/(bundles*section); %Mass flow split between 36 bundles, which are split into 4 each
     m_g_2_D=m_g/(bundles*section);
