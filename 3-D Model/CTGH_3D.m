@@ -39,6 +39,7 @@ m_l_manifold=zeros(n+1,1);
 m_l_2_D=zeros(n+1,1);
 delta_p=zeros(n+1,1);
 P_l_inlet=zeros(n+1,1);
+P_l_static=zeros(n+1,1);
 X=0:L_manifold/n:L_manifold; %Evenly distribute X along manifold starting at x=0
 x=X/L_manifold; %Nondimensionalize X in terms of the length of the manifold
 %Starting values of vectors:
@@ -47,6 +48,8 @@ u_c_l(1)=0;
 m_l_manifold(1)=w_l(1)*m_l/entry;
 delta_p(1)=0;
 P_l_inlet(1)=P_l_in;
+P_l_static_in=P_l_in-rho_l*W_0_l^2/2*10^-5;
+P_l_static(1)=P_l_static_in;
 for i=1:n
 Re_l_man(i)=rho_l*W_0_l*w_l(i)*D_manifold/mu_l; %Reynolds number of liquid in manifold
 if Re_l_man(i)<=2200
@@ -67,7 +70,8 @@ u_c_l(i+1)=(F_m_l/(2*n*F_c_l))*exp(-B_l(i)*x(i+1)/2)*(B_l(i)*sin(sqrt(3)*J_l(i)*
 m_l_manifold(i+1)=w_l(i+1)*m_l/entry;
 m_l_2_D(i+1)=u_c_l(i+1)*m_l*F_c_l/F_m_l;
 delta_p(i+1)=L_manifold*f_m_l(i)/(4*D_manifold*B_l(i)*sin(sqrt(3)/2*J_l(i))^2)*(exp(-B_l(i)*x(i+1))-1)-L_manifold*f_m_l(i)/(4*4*D_manifold*(B_l(i)^2+3*J_l(i)^2)*sin(sqrt(3)/2*J_l(i))^2)*(B_l(i)*exp(-B_l(i)*x(i+1))*cos(sqrt(3)*J_l(i)*(1-x(i+1)))-sqrt(3)*J_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1)))+B_l(i)*cos(sqrt(3)*J_l(i))+sqrt(3)*J_l(i)*sin(sqrt(3)*J_l(i)))-k_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1))/2)^2/sin(sqrt(3)*J_l(i)/2)^2;
-P_l_inlet(i+1)=P_l_in+delta_p(i+1)*rho_l*W_0_l^2*10^-5;
+P_l_static(i+1)=P_l_static_in+delta_p(i+1)*rho_l*W_0_l^2*10^-5;
+P_l_inlet(i+1)=P_l_static(i+1)+rho_l*(W_0_l*w_l(i+1))^2/2*10^-5;
 end
 %% Gas Mass Flow Rate Distribution
 D_center_bund=2*R_ci;
@@ -91,9 +95,11 @@ m_g_center_bund=zeros(n+1,1);
 m_g_2_D=zeros(n+1,1);
 Eu_man_g=zeros(n+1,1);
 P_g_inlet=zeros(n+1,1);
+P_g_static=zeros(n+1,1);
 w_g=zeros(n+1,1);
 Y=0:H_bank/n:H_bank; %Evenly distribute Y along bundle starting at y=0
 y=Y/H_bank; %Nondimensionalize Y in terms of the height of the bundle
+P_g_static_in=P_g_in-rho_g*W_0_g^2/2*10^-5; %Finds inlet static pressure by subtracting dynamic pressure from total pressure in bar
 for i=1:n+1
     w_g(i)=1-y(i);
     Re_g_man(i)=rho_g*W_0_g*w_g(i)*D_manifold/mu_g; %Reynolds number of liquid in manifold
@@ -105,9 +111,10 @@ for i=1:n+1
     elseif Re_g_man(i)>2200 && Re_g_man(i)<=10^5
         Eu_man_g(i)=alpha_press_g*(1-(1-y(i))^2)-0.058*H_bank/(D_center_bund*Re_g_man(1)^0.25)*(1-(1-y(i))^2.75)-2*gamma_press_g*((1-y(i))^2*log(1-y(i))+1/2*y(i)*(2-y(i)));
     else
-        Eu_man_g(i)=alpha_press_g*(1-(1-y(i))^2)-0.0032*H_bank/(D_center_bund*6)*(1-(1-y(i))^3)-0.04*H_bank/(D_center_bund*Re_g_man(1)^0.237)*(1-(1-y(i))^2.763)-2*gamma_press_g*((1-y(i))^2*log(1-y(i))+1/2*y(i)*(2-y(i)));
+        Eu_man_g(i)=alpha_press_g*(1-(1-y(i))^2)-0.0032*H_bank/(D_center_bund*6)*(1-(1-y(i))^3)-0.04*H_bank/(D_center_bund*Re_g_man(i)^0.237)*(1-(1-y(i))^2.763)-2*gamma_press_g*((1-y(i))^2*log(1-y(i))+1/2*y(i)*(2-y(i)));
     end
-    P_g_inlet(i)=rho_g*W_0_g^2*Eu_man_g(i)*10^-5+P_g_in; %Pressure in bar
+    P_g_static(i)=rho_g*W_0_g^2*Eu_man_g(i)*10^-5+P_g_static_in; %Static Pressure in bar
+    P_g_inlet(i)=P_g_static(i)+rho_g*(w_g(i)*W_0_g)^2/2*10^-5; %Finds total pressure at each point along bundle
 end
 delete('3-D Model/THEEM_Output_temp_0D.mat');
 %% Run 2-D simulation and store matrix outputs
@@ -121,11 +128,12 @@ P_l_store=cell(n,1);
 P_g_store=cell(n,1);
 Q_store=cell(n,1);
 epsilon_store=zeros(n,1);
+F_factor_store=zeros(n,1);
 U_store=zeros(n,1);
 Area_store=zeros(n,1);
 for i=1:n
     h=waitbar((i-1)/n,sprintf('Progress = %2.2f%%',(i-1)/n*100));
-    [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i+1),m_g_2_D(n+1-i),P_l_inlet(i+1),P_g_inlet(n+1-i));
+    [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,F_factor,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i+1),m_g_2_D(n+1-i),P_l_inlet(i+1),P_g_inlet(n+1-i));
     T_l_out_store{i}=T_l_out;
     T_g_out_store{i}=T_g_out;
     P_l_out_store{i}=P_l_out;
@@ -138,7 +146,7 @@ for i=1:n
     U_store(i)=U_avg;
     Area_store(i)=A_total;
     epsilon_store(i)=epsilon;
+    F_factor_store(i)=F_factor;
     delete(h)
 end
-
 save('3-D Model/THEEM_Output_3D.mat');
