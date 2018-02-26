@@ -15,11 +15,12 @@ t_manifold=0.003; %Manifold thickness [m]
 L_manifold=H_bank; %Length of manifold [m]
 if L_manifold/D_manifold<=30
     alpha_press=0.5; %Manifold pressure recovery factor at first volume
-    gamma_press=0.146; %Manifold pressure recovery factor increment
+    gamma_press=-0.146/n; %Manifold pressure recovery factor increment
 else
     alpha_press=0.6; %Manifold pressure recovery factor at first volume
-    gamma_press=0.15; %Manifold pressure recovery factor increment
+    gamma_press=-0.15/n; %Manifold pressure recovery factor increment
 end
+
 %% Liquid Mass Flow Rate Distribution
 f_c_l=f_l; %Average friction factor for tubes in tube bank calculated by 0-D code
 F_c_l=tubes_vol*(pi/4)*D_in^2; %Port (outlet leaving manifold) cross sectional area [m^2]
@@ -55,12 +56,15 @@ Re_l_man(i)=rho_l*W_0_l*w_l(i)*D_manifold/mu_l; %Reynolds number of liquid in ma
 if Re_l_man(i)<=2200
     f_m_l(i)=64/Re_l_man(i); %Friction factor in manifold if laminar
 elseif Re_l_man(i)>2200 && Re_l_man(i)<=10^5
-    f_m_l(i)=0.790*log(Re_l_man(i)-1.64)^(-2); %Friction factor if transitional
+    f_m_l(i)=0.3164/(Re_l_man(i)^0.25); %Friction factor if transitional
 else
     f_m_l(i)=0.0032+0.221/(Re_l_man(i)^0.237); %Friction factor if turbulent
 end
 zeta_l(i)=(1+C_f+f_c_l*L_tube_avg/D_in);
 k_l(i)=alpha_press+2*gamma_press*log(w_l(i));
+if k_l(i)<0
+    k_l(i)=0;
+end
 Q_l(i)=2/(3*zeta_l(i))*k_l(i)*(F_c_l*n/F_m_l)^2;
 R_l(i)=-(f_m_l(i)*L_manifold/(4*D_manifold*zeta_l(i)))*(F_c_l*n/F_m_l)^2;
 B_l(i)=sign(R_l(i)+sqrt(Q_l(i)^3+R_l(i)^2))*abs((R_l(i)+sqrt(Q_l(i)^3+R_l(i)^2)))^(1/3)+sign(R_l(i)-sqrt(Q_l(i)^3+R_l(i)^2))*abs((R_l(i)-sqrt(Q_l(i)^3+R_l(i)^2)))^(1/3); %Cubic root was giving the complex roots. Using sign(x)*abs(x)^(1/3) forces Matlab to find the real cubic root.
@@ -69,7 +73,7 @@ w_l(i+1)=exp(-B_l(i)*x(i+1)/2)*(sin(sqrt(3)/2*J_l(i)*(1-x(i+1)))/sin(sqrt(3)*J_l
 u_c_l(i+1)=(F_m_l/(2*n*F_c_l))*exp(-B_l(i)*x(i+1)/2)*(B_l(i)*sin(sqrt(3)*J_l(i)*(1-x(i+1))/2)+sqrt(3)*J_l(i)*cos(sqrt(3)*J_l(i)*(1-x(i+1))/2))/(sin(sqrt(3)*J_l(i)/2));
 m_l_manifold(i+1)=w_l(i+1)*m_l/entry;
 m_l_2_D(i+1)=u_c_l(i+1)*m_l*F_c_l/F_m_l;
-delta_p(i+1)=L_manifold*f_m_l(i)/(4*D_manifold*B_l(i)*sin(sqrt(3)/2*J_l(i))^2)*(exp(-B_l(i)*x(i+1))-1)-L_manifold*f_m_l(i)/(4*4*D_manifold*(B_l(i)^2+3*J_l(i)^2)*sin(sqrt(3)/2*J_l(i))^2)*(B_l(i)*exp(-B_l(i)*x(i+1))*cos(sqrt(3)*J_l(i)*(1-x(i+1)))-sqrt(3)*J_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1)))+B_l(i)*cos(sqrt(3)*J_l(i))+sqrt(3)*J_l(i)*sin(sqrt(3)*J_l(i)))-k_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1))/2)^2/sin(sqrt(3)*J_l(i)/2)^2;
+delta_p(i+1)=L_manifold*f_m_l(i)/(4*D_manifold*B_l(i)*(sin(sqrt(3)/2*J_l(i)))^2)*(exp(-B_l(i)*x(i+1))-1)-L_manifold*f_m_l(i)/(4*D_manifold*(B_l(i)^2+3*J_l(i)^2)*sin(sqrt(3)/2*J_l(i))^2)*(B_l(i)*exp(-B_l(i)*x(i+1))*cos(sqrt(3)*J_l(i)*(1-x(i+1)))-sqrt(3)*J_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1)))+B_l(i)*cos(sqrt(3)*J_l(i))+sqrt(3)*J_l(i)*sin(sqrt(3)*J_l(i)))-k_l(i)*exp(-B_l(i)*x(i+1))*sin(sqrt(3)*J_l(i)*(1-x(i+1))/2)^2/(sin(sqrt(3)*J_l(i)/2))^2;
 P_l_static(i+1)=P_l_static_in+delta_p(i+1)*rho_l*W_0_l^2*10^-5;
 P_l_inlet(i+1)=P_l_static(i+1)+rho_l*(W_0_l*w_l(i+1))^2/2*10^-5;
 end

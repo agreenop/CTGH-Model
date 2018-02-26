@@ -95,7 +95,7 @@ axis([Y(1),Y(numel(Y)),0,delta_P_l_avg(1)]);
 axis 'auto y'
 figure(8)
 plot(X_liq(1:n),Q_sum_store) %Plot heat transfer distribution
-title('Verttical Heat Transfer Distribution across Bundle')
+title('Vertical Heat Transfer Distribution across Bundle')
 xlabel('Vertical Position in Tube Bundle (m)')
 ylabel('Heat Transfer (W)')
 axis([Y(1),Y(numel(Y)),0,Q_sum_store(1)]);
@@ -129,9 +129,9 @@ for k1=1:size(P_g_out_store,1)
 end
 figure(9)
 hold on
-plot(Y(1:n),T_g_out_avg,'-k') %Plot gas outlet temperature distribution
-plot(Y(1:n),T_g_out_min,'-.b') %Minimum outlet temperature at each cross section
-plot(Y(1:n),T_g_out_max,'--r') %Minimum outlet temperature at each cross section
+plot(X_liq(1:n),T_g_out_avg,'-k') %Plot gas outlet temperature distribution
+plot(X_liq(1:n),T_g_out_min,'-.b') %Minimum outlet temperature at each cross section
+plot(X_liq(1:n),T_g_out_max,'--r') %Minimum outlet temperature at each cross section
 title([gas ' Outlet Temperature Distribution'])
 xlabel('Vertical Position in Tube Bundle (m)')
 ylabel('Temperature (\circC)')
@@ -140,9 +140,9 @@ axis 'auto y'
 legend('Mean Outlet Temperature','Minimum Temperature','Maximum Temperature','Location','Best')
 figure(10)
 hold on
-plot(Y(1:n),delta_P_g_avg,'-k') %Plot gas pressure drop distribution
-plot(Y(1:n),delta_P_g_min,'-.b') %Minimum pressure drop at each cross section
-plot(Y(1:n),delta_P_g_max,'--r') %Maximum pressure drop at each cross section
+plot(X_liq(1:n),delta_P_g_avg,'-k') %Plot gas pressure drop distribution
+plot(X_liq(1:n),delta_P_g_min,'-.b') %Minimum pressure drop at each cross section
+plot(X_liq(1:n),delta_P_g_max,'--r') %Maximum pressure drop at each cross section
 title([gas ' Pressure Drop Distribution'])
 xlabel('Vertical Position in Tube Bundle (m)')
 ylabel('Pressure Drop (bar)')
