@@ -11,7 +11,7 @@ else
     load('THEEM_Input_temp_2D.mat');
 end
 i=1;
-[L,R_curv,H,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i);%Establishes geometry of tubes
+[~,~,~,tubes_vol,N_T,N_L,tubes,D_in,section,L_tube_avg,vol_cells_gap,slice_total,slice_holder,R_co,vol_wid]=CTGH_geom(THEEM_model,i);%Establishes geometry of tubes
 Q=zeros(loops*entry+spacers,slice_total); %Establish grid size of system
 T_l=zeros(size(Q,1),size(Q,2));
 T_g=zeros(size(Q,1)+1,size(Q,2));
@@ -50,23 +50,20 @@ gaps_position=zeros(1,spacers);
 for gap=1:spacers %Start the count for tie rod gaps
     gaps_position(gap)=size(Q,1)-(vol_cells_gap-1)-(gap-1)*(1+vol_cells_gap);%Radial locations of volumes adjacent to tie rod gaps
 end
-% m_g_vol=porous_media_approx(m_g_2_D,T_g,slice_holder,slice_total,gaps_position,tube_holders); %External function determines isothermal gas flow using a porous media approximation
 for j=1:size(T_g,2)
     T_g(1,j)=T_g_in; %Gas inlet temperature at interior of CTGH
     P_g(1,j)=P_g_in; %Gas inlet pressure at interior of CTGH
 end
-BC_g=nnz(T_g);%Number of 'cool' gas entry points into CTGH
 entry_step=round(size(Q,2)/entry);%Establishes the number of azimuthal elements that should be between each liquid manifold. Round forces it to be an integer.
 max_entry=size(Q,2)+2-entry_step; %Prevents the code from establishing n+1 entry points.  Add 1 to make the 1st point equal to total+1.  Add another 1 to account for round functioning rounding up instead of down.
 for j=1:entry_step:max_entry
     T_l(size(T_l,1),j)=T_l_in; %Coolant inlet temperatures at manifold entry points
     P_l(size(T_l,1),j)=P_l_in; %Coolant inlet pressure at manifold entry points
 end
-BC_l=nnz(T_l); %Number of 'hot' coolant entry points into CTGH
 inlet_prop=1; %Determines which temperature heat properties are taken at for liquid and gas.
 T_l_out_old=zeros(size(T_l,1),size(T_l,2));
 while (1) %Starts process assuming constant heat transfer properties throughout system. Repeats using properties based on average temperature and pressure of volume cell.
-A=zeros(numel(T_l)+numel(T_g)+numel(Q)-BC_l-BC_g,numel(T_l)+numel(T_g)+numel(Q));
+A=zeros((numel(Q)-3*entry)*3+entry-size(Q,2)*2*spacers,numel(T_l)+numel(T_g)+numel(Q));
 B=zeros(size(A,1),1);
 count=0; %Count that tracks the number of equations used
 entry_number=1; %Tracks which entry point/loop that i currently being calculated
@@ -111,7 +108,7 @@ while i>0
        q1=numel(T_l)+numel(T_g)+(i-1)*size(Q,2)+j; %Placement of Q coefficient
        %EQ1: 0=m_l_vol*Cp_l*(T_l(i,j)-T_l(i,j+1))-Q(i,j);
        count=count+1; %Tracks number of equations
-       [UA,Cp_l,Cp_g,rho_l,u_max_app,rho_g,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,T_s_in_matrix,THEEM_model);
+       [UA,Cp_l,Cp_g,rho_l,u_max_app,~,Re_g,h_g,Area,Re_l,f_l,De_l,h_l,Nu_l,Nu_g]=heat_properties(inlet_prop,T_g,T_l,P_g,m_g_vol,i,j,i1,j1,m_l_t,T_s_out_matrix,T_s_in_matrix,THEEM_model);
        UA_matrix(i,j)=UA; %Records UA values for this volume
        U_matrix(i,j)=UA/Area; %Records U values for this volume
        A_matrix(i,j)=Area; %Records surface area for each volume
@@ -185,24 +182,22 @@ while i>0
        end
        if i==1 && j1==size(T_l,2)-2 %Stops loop at T_l(1,size(T_l,2)-2), a liquid exit point. Only applies to loop with entry point at j=1.
            count=count+1;
-           g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
            B(count)=m_g_vol*Cp_g*T_g(i1,j1); 
            A(count,g2)=m_g_vol*Cp_g;
-           A(count,q1)=-1;
+           A(count,q1)=0; %Changed from -1
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature position of this loop in azimuthal direction
            entry_number=entry_number+1; %Moves counter to next loop.
            i=0;
            break %Exit for loop. i=0 fullfills while condition.
        elseif j1==j_entry-3 && i==1 %Stops loop at all other liquid exit points besides loop with entry point at j=1.
            count=count+1;
-           g1=numel(T_l)+(i1-1)*size(T_g,2)+j1; %Placement of final T_g(i1,j1) coefficient in loop
            g2=numel(T_l)+(i1)*size(T_g,2)+j1; %Placement of final T_g(i1+1,j1) coefficient in loop
            q1=numel(T_l)+numel(T_g)+(i1-1)*size(Q,2)+j1; %Placement of final Q(i1,j1) coefficient in loop
            B(count)=m_g_vol*Cp_g*T_g(i1,j1);
            A(count,g2)=m_g_vol*Cp_g;
-           A(count,q1)=-1;
+           A(count,q1)=0; %Changed from -1
            T_l_out(entry_number,1)=j1; %Records outlet liquid temperature of this loop
            entry_number=entry_number+1; %Moves counter to next loop.
            i=0;
@@ -274,7 +269,7 @@ i1=1;
 %tubes across the tube bundle.
 for i=1:size(Q,1)
     for j=1:size(Q,2)
-        if Q(i,j)~=0
+        if Q(i,j)~=0 && i1_matrix(i,j)~=0 && j1_matrix(i,j)~=0
            T_s_in_matrix(i,j)=(T_l(i,j)+T_l(i1_matrix(i,j),j1_matrix(i,j)))/2-Q(i,j)/(h_l_matrix(i,j)*A_matrix(i,j)*D_in/D_out);
            T_s_out_matrix(i,j)=(T_g(i,j)+T_g(i+1,j))/2+Q(i,j)/(h_g_matrix(i,j)*A_matrix(i,j));
         end

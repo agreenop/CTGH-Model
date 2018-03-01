@@ -47,5 +47,5 @@ else
             break
         end
     end
-end    
+end
 L=R_curv*2*pi/slice_total; %Length of control volume in direction of coolant flow [m]
