@@ -30,7 +30,8 @@ end
 %% Tube Material Properties
 switch tube_material
     case '316 Stainless Steel'
-        k_t=13.40; %316 SS thermal conductivity [W/m*K]
-        rho_t=8238; %316 SS density [kg/m^3]
-        Cp_t=468; %316 SS specific heat [J/kg*K]
+        [k_t,rho_t,Cp_t] = SS_316_prop;
+%         k_t=13.40; %316 SS thermal conductivity [W/m*K]
+%         rho_t=8238; %316 SS density [kg/m^3]
+%         Cp_t=468; %316 SS specific heat [J/kg*K]
 end

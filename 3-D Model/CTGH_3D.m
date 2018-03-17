@@ -135,8 +135,9 @@ epsilon_store=zeros(n,1);
 F_factor_store=zeros(n,1);
 U_store=zeros(n,1);
 Area_store=zeros(n,1);
+h=waitbar(0,sprintf('Progress = %2.2f%%',0));
 for i=1:n
-    h=waitbar((i-1)/n,sprintf('Progress = %2.2f%%',(i-1)/n*100));
+    h=waitbar((i-1)/n,h,sprintf('Progress = %2.2f%%',(i-1)/n*100));
     [T_l_out,T_g_out,P_l_out,T_l,T_g,P_l,P_g,Q,F_factor,epsilon,U_avg,A_total]=CTGH_2D(THEEM_model,m_l_2_D(i+1),m_g_2_D(n+1-i),P_l_inlet(i+1),P_g_inlet(n+1-i));
     T_l_out_store{i}=T_l_out;
     T_g_out_store{i}=T_g_out;
@@ -151,6 +152,6 @@ for i=1:n
     Area_store(i)=A_total;
     epsilon_store(i)=epsilon;
     F_factor_store(i)=F_factor;
-    delete(h)
 end
+delete(h)
 save('3-D Model/THEEM_Output_3D.mat');

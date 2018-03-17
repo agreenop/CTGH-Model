@@ -94,7 +94,7 @@ if FileName~=0 %A .mat file needs to be selected
        load([PathName,FileName],'THEEM_model') %Specify which THEEM model is being used, i.e. 2-D vs. 3-D
        compare=strcmp([PathName,FileName],[pwd,'\0-D Model\THEEM_Input_0D.mat']); %Compares string of selected file to string of default input file
        if compare==0 %If file is existing .mat file in folder, program does not copy it.  It just uses it.
-       copyfile([PathName,FileName],[pwd,'0-D Model\THEEM_Input_0D.mat'])
+       copyfile([PathName,FileName],[pwd,'\0-D Model\THEEM_Input_0D.mat'])
        end
        CTGH_0D(THEEM_model);
        evalin('base','load(''THEEM_Output_0D.mat'')');

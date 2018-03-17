@@ -1,14 +1,15 @@
 %This program will create a 0-D model of the Coiled Gas Tube Heater.  This
 %is based off the 0-D Excel Spreadsheet.  February 23,2016
-function CTGH_0D(THEEM_model,i)
+function CTGH_0D(THEEM_model,run,results_location)
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     load('THEEM_Input_0D.mat');
     T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
     T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
     LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
 elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
-    fname1=sprintf('Optimization_Files/Inputs/Input%d.mat',i);
+    fname1=sprintf('Optimization Program/Optimization_Files/Inputs/Input%d.mat',run);
     load(fname1);
+    THEEM_model='Optimization';
     T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
     T_l_avg=(T_l_in+T_l_out)/2; %Average liquid outlet temp. [degC]
     LMTD=((T_l_in-T_g_out)-(T_l_out-T_g_in))/log((T_l_in-T_g_out)/(T_l_out-T_g_in)); %Log Mean Temp. Difference
@@ -112,10 +113,14 @@ if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     epsilon=Q_tot/Q_max;
     save('0-D Model/THEEM_Output_0D.mat');
 elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
-    output_name=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',i);
-    save(output_name,'tubes','D_curve_outer','H_bank','Area_surf','u_g_max','Re_g','U','A_ideal','F','deltaP_g','deltaP_l','bank_depth');
-    range_output=sprintf('L%d:W%d',i+1,i+1);
-    B=[tubes,D_curve_outer,H_bank,Area_surf,u_g_max,Re_g,U,A_ideal,F,deltaP_g,deltaP_l,bank_depth];
+    Q_tot=m_g*Cp_g*(T_g_out-T_g_in)/10^6; %Gas thermal power [MW]
+    A_ideal=Q_tot*10^6/(U*LMTD); %Ideal (F=1) surface area based on outer diameter[m^2]
+    F=A_ideal/Area_surf; %Reguired F factor needed to obtain heat transfer, Q_tot
+    L_ideal=A_ideal/(pi*D_out); %Ideal total tube length
+    output_name=sprintf('Optimization Program/Optimization_Files/Outputs/Output%d.mat',run);
+    save(output_name,'tubes','D_curve_outer','H_bank','Area_surf','F','deltaP_g','deltaP_l','bank_depth');
+    range_output=sprintf('L%d:S%d',run+1,run+1);
+    B=[tubes,D_curve_outer,H_bank,Area_surf,F,deltaP_g,deltaP_l,bank_depth];
     xlswrite(results_location,B,range_output);
 elseif strcmp(THEEM_model,'Parametric Study') %Runs for Parametric Study
     save('Optimization Program/Parametric Study/THEEM_Output_temp_0D.mat');
