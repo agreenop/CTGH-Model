@@ -6,7 +6,6 @@ clc;clear;
 results_location=sprintf('Optimization Program/Optimization_Files/Optimization_Results.xlsx');%Store file name as variable
 delete(results_location); %Delete previous results
 %These inputs will not be changed by the optimization code:
-% load('THEEM_Input_Optimization.mat');
 m_g=1360.5;
 m_l=1267;
 P_g_in=199.5;
@@ -24,8 +23,8 @@ spacers=2;
 spacer_width=0.0380;
 disk_thick=.003;
 %% Physical Constraints
-D_bund_out_max=4; % Max diameter of vessel [meters]
-H_bund_max=15; % Max height of vessel [meters]
+D_bund_out_max=6; % Max diameter of vessel [meters]
+H_bund_max=20; % Max height of vessel [meters]
 bund_width_min=0.25; %Minimum width of bundle as a percentage of vessel outer diameter
 sub_min_tot=20; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
 sub_max_tot=60; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.

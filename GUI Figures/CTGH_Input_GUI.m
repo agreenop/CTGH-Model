@@ -457,13 +457,13 @@ switch Model_Selection
         set(handles.Liquid_Inlets,'String',4);
         set(handles.Loops,'String',3);
         set(handles.tube_layer,'String',3);
-        set(handles.layer_num,'String',40);
-        set(handles.bundles,'String',36);
+        set(handles.layer_num,'String',28);
+        set(handles.bundles,'String',40);
         set(handles.spacers,'String',2);
         set(handles.spacer_width,'String',0.038);
         set(handles.Gap_Units,'Value',1);
         set(handles.tube_holders,'String',12);
-        set(handles.Bundle_Radius,'String',0.662);
+        set(handles.Bundle_Radius,'String',0.450);
         set(handles.Bundle_Radius_Units,'Value',1);
         set(handles.tube_slope,'String',0.003);
         set(handles.heat_rod,'String',1/2);
@@ -529,6 +529,37 @@ switch Model_Selection
         set(handles.Bundle_Radius_Units,'Value',2);
         set(handles.tube_slope,'String',0);
         set(handles.heat_rod,'String',0);
+    case 'SFR-100'
+        set(handles.Gas_Type,'Value',2);
+        set(handles.Liquid_Type,'Value',3);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',367);
+        set(handles.Outlet_Gas_Temp,'String',516.6);
+        set(handles.Inlet_Gas_Press,'String',199.5);
+        set(handles.Gas_Mass_Flow,'String',1360.5);
+        set(handles.Inlet_Liquid_Temp,'String',528);
+        set(handles.Outlet_Liquid_Temp,'String',373);
+        set(handles.Inlet_Liquid_Press,'String',3);
+        set(handles.Liquid_Mass_Flow,'String',1267);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.065);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',4);
+        set(handles.Loops,'String',5);
+        set(handles.tube_layer,'String',6);
+        set(handles.layer_num,'String',48);
+        set(handles.bundles,'String',49);
+        set(handles.spacers,'String',2);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',12);
+        set(handles.Bundle_Radius,'String',0.3864);
+        set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.tube_slope,'String',0.003);
+        set(handles.heat_rod,'String',0.5);
 end
 
 % --- Executes on button press in Cancel.
@@ -896,6 +927,37 @@ switch model_selection
         set(handles.Bundle_Radius_Units,'Value',2);
         set(handles.tube_slope,'String',0);
         set(handles.heat_rod,'String',0);
+    case 'SFR-100'
+        set(handles.Gas_Type,'Value',2);
+        set(handles.Liquid_Type,'Value',3);
+        set(handles.Tube_Material,'Value',1);
+        set(handles.Diameter_Units,'Value',1);
+        set(handles.Thickness_Units,'Value',1);
+        set(handles.Inlet_Gas_Temp,'String',367);
+        set(handles.Outlet_Gas_Temp,'String',516.6);
+        set(handles.Inlet_Gas_Press,'String',199.5);
+        set(handles.Gas_Mass_Flow,'String',1360.5);
+        set(handles.Inlet_Liquid_Temp,'String',528);
+        set(handles.Outlet_Liquid_Temp,'String',373);
+        set(handles.Inlet_Liquid_Press,'String',3);
+        set(handles.Liquid_Mass_Flow,'String',1267);
+        set(handles.Tube_Diameter,'String',0.25);
+        set(handles.Tube_Thickness,'String',0.065);
+        set(handles.Long_Pitch_Ratio,'String',1.256);
+        set(handles.Transverse_Pitch_Ratio,'String',1.45);
+        set(handles.Liquid_Inlets,'String',4);
+        set(handles.Loops,'String',5);
+        set(handles.tube_layer,'String',6);
+        set(handles.layer_num,'String',48);
+        set(handles.bundles,'String',49);
+        set(handles.spacers,'String',2);
+        set(handles.spacer_width,'String',0.038);
+        set(handles.Gap_Units,'Value',1);
+        set(handles.tube_holders,'String',12);
+        set(handles.Bundle_Radius,'String',0.3864);
+        set(handles.Bundle_Radius_Units,'Value',1);
+        set(handles.tube_slope,'String',0.003);
+        set(handles.heat_rod,'String',0.5);
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns Model_Selection contents as cell array
