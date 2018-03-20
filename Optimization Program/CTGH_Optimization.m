@@ -16,7 +16,7 @@ T_l_out=373; %Liquid Outlet temperature [degC]
 T_g_out=516.6; %Gas outlet temperature [degC]
 gas='Supercritical CO2';
 liquid='Sodium';
-heat_rod=0.5;
+heat_rod=1/3;
 tube_material='316 Stainless Steel';
 tube_slope=0.0030;
 spacers=2;
@@ -24,16 +24,16 @@ spacer_width=0.0380;
 disk_thick=.003;
 %% Physical Constraints
 D_bund_out_max=6; % Max diameter of vessel [meters]
-H_bund_max=20; % Max height of vessel [meters]
-bund_width_min=0.25; %Minimum width of bundle as a percentage of vessel outer diameter
+H_bund_max=12; % Max height of vessel [meters]
+bund_width_min=0.35; %Minimum width of bundle as a percentage of vessel outer diameter
 sub_min_tot=20; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
 sub_max_tot=60; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.
 layer_min_tot=30;% Absolute minimum number of tube layers per sub-bundles allowed.  This may increase later, but not decrease.
 layer_max_tot=100;% Absolute maximum number of tube layers per sub-bundles allowed.  This may decrease later, but not increase.
 entry_min_tot=2; % Absolute minimum number of manifolds allowed.  This may increase later, but not decrease.
-entry_max_tot=6; % Absolute maximum number of manifolds allowed.  This may decrease later, but not increase.
+entry_max_tot=7; % Absolute maximum number of manifolds allowed.  This may decrease later, but not increase.
 loops_min_tot=2; % Absolute minimum number of loops allowed.  This may increase later, but not decrease.
-loops_max_tot=5; % Absolute maximum number of loops allowed.  This may decrease later, but not increase.
+loops_max_tot=7; % Absolute maximum number of loops allowed.  This may decrease later, but not increase.
 [~,~,~,S_allow] = SS_316_prop(T_g_out); % Max allowable stress for pressure vessel [bar]
 t_vessel=P_g_in*(D_bund_out_max/2)/(S_allow-0.6*P_g_in); % [meters] Thickness of vessel outer wall
 %% Create New Excel File
@@ -47,7 +47,7 @@ T={'Run','Outside Diameter [in]','Thickness [in]','Longitudinal Pitch',...
    'Tube Bank Depth [m]'}; %Column labels in the Excel Spreadsheet
 xlswrite(results_location,T,'A1:S1')
 %% Start Runs
-run_total=10000; %Total number of runs code will perform
+run_total=10;%000; %Total number of runs code will perform
 h=waitbar(0,sprintf('Progress = %2.2f%%',0));
 for run=1:run_total
     h=waitbar((run-1)/run_total,h,sprintf('Progress = %2.2f%%',(run-1)/run_total*100));
@@ -65,22 +65,27 @@ end
 SL=1.256; % SL & ST hav little effect on pressure drops and effectiveness, so just assigned.  Can be reduced if bundle too large
 ST=SL/cosd(30); %In order to have the SD=ST, SL=ST*cosd(30). Forms equilateral triangle.
 % Tubes per layer
-tube_layer=randi([3,6]); %Has little effect, so just chosen randomly between 3-6. Can be reduced if bundle too large
+tube_layer=randi([3,7]); %Has little effect, so just chosen randomly between 3-6. Can be reduced if bundle too large
 % Choose inner radius of tube bundle
 R_ci_min=0.25; %Minimum inside radius of bundle is 0.25 m 
-R_ci_max=((1-bund_width_min)* (D_bund_out_max/2)-t_vessel)/2;% Maximum inside radius of bundle so that bundle makes up the minimum percentage of the vessel
+% R_ci_max=((1-bund_width_min)*(D_bund_out_max/2)-t_vessel)/2;% Maximum inside radius of bundle so that bundle makes up the minimum percentage of the vessel
+R_ci_max=0.5*(sqrt(-(D_bund_out_max/2)^2*bund_width_min^2+2*(D_bund_out_max/2)^2-2*(D_bund_out_max/2)*bund_width_min*t_vessel-4*(D_bund_out_max/2)*t_vessel+t_vessel^2)-(D_bund_out_max/2)*bund_width_min-t_vessel);% Maximum inside radius of bundle so that bundle makes up the minimum percentage of the vessel
 R_ci=R_ci_min+(R_ci_max-R_ci_min)*rand(1,1); %Randomly chooses an inner radius between min and max values
 %% Choose higher priority parameters within constraints
 %Tube Bundle dimension Constraints
-width_limit=D_bund_out_max/2-t_vessel-2*R_ci-spacers*spacer_width; %Maximum width of bundle, excluding tie rod spacers, based on center of bundle having same area as outer annulus between bundle and pressure vessel.   
+% width_limit=D_bund_out_max/2-t_vessel-2*R_ci-spacers*spacer_width; %Maximum width of bundle, excluding tie rod spacers, based on center of bundle having same area as outer annulus between bundle and pressure vessel.   
+width_limit_max=D_bund_out_max/2-t_vessel-R_ci-(D_bund_out_max/2-sqrt((D_bund_out_max/2-t_vessel)^2-R_ci^2))-spacers*spacer_width; %Maximum width of bundle, excluding tie rod spacers, based on center of bundle having same area as outer annulus between bundle and pressure vessel.   
+width_limit_min=bund_width_min*(D_bund_out_max/2)-spacers*spacer_width; %The bundle should take up at least a specified percentage of the vessel
 %bank_depth=entry*(tube_layer*2)*loops*SL*D_out+spacers*spacer_width;
 % H=D_out*ST*((layer_num+1)/2); %Height of sub-bundle, excluding spacer disk [m]
 %Minimum and maximum values for each parameter
-entry_max_geom=sqrt(width_limit/(2*tube_layer*D_out*SL));
+entry_max_geom=sqrt(width_limit_max/(2*tube_layer*D_out*SL));
 loops_max_geom=entry_max_geom;
-entry_min=entry_min_tot;
+entry_min_geom=sqrt(width_limit_min/(2*tube_layer*D_out*SL));
+loops_min_geom=entry_min_geom;
+entry_min=max(ceil(entry_min_geom),entry_min_tot);
 entry_max=min(floor(entry_max_geom),entry_max_tot);
-loops_min=loops_min_tot;
+loops_min=max(ceil(loops_min_geom),loops_min_tot);
 loops_max=min(floor(loops_max_geom),loops_max_tot);
 counter_width=1;
 while loops_max<loops_min || entry_max<entry_min %If the geometry is impossible, the inner radius will be shrunk until geometry is possible within width constraint
@@ -92,10 +97,14 @@ while loops_max<loops_min || entry_max<entry_min %If the geometry is impossible,
     elseif R_ci==R_ci_min && tube_index==1
         error('Geometric constraints are not physically possible.  Please adjust the constraints and try again.')
     end
-    width_limit=D_bund_out_max/2-t_vessel-2*R_ci-spacers*spacer_width; %Calculates new width limit
-    entry_max_geom=sqrt(width_limit/(2*tube_layer*D_out*SL)); %Calculates new maximums
+    width_limit_max=D_bund_out_max/2-t_vessel-2*R_ci-spacers*spacer_width; %Calculates new width limit
+    entry_max_geom=sqrt(width_limit_max/(2*tube_layer*D_out*SL));
     loops_max_geom=entry_max_geom;
+    entry_min_geom=sqrt(width_limit_min/(2*tube_layer*D_out*SL));
+    loops_min_geom=entry_min_geom;
+    entry_min=max(ceil(entry_min_geom),entry_min_tot);
     entry_max=min(floor(entry_max_geom),entry_max_tot);
+    loops_min=max(ceil(loops_min_geom),loops_min_tot);
     loops_max=min(floor(loops_max_geom),loops_max_tot);
     counter_width=counter_width+1;
 end %Repeats process until geometry works
@@ -121,7 +130,7 @@ input_name=sprintf('Optimization Program/Optimization_Files/Inputs/Input%d.mat',
 THEEM_model='0D';
 save(input_name,'m_g','m_l','P_g_in','P_l_in','T_g_in','T_l_in','T_l_out','T_g_out','D_out','t','SL','ST','entry','layer_num','tube_layer','bundles','gas','heat_rod','liquid','loops','R_ci','tube_material','tube_slope','spacer_width','spacers','THEEM_model');
 range_input=sprintf('A%d:K%d',run+1,run+1);
-A=[run,D_out_in,t_in,SL,ST,entry,layer_num,tube_layer,R_ci,loops,bundles];
+A=[run,D_out/0.0254,t_in,SL,ST,entry,layer_num,tube_layer,R_ci,loops,bundles];
 xlswrite(results_location,A,range_input);
 THEEM_model='Optimization';
 CTGH_0D(THEEM_model,run,results_location)
