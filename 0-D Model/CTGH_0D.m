@@ -1,6 +1,6 @@
 %This program will create a 0-D model of the Coiled Gas Tube Heater.  This
 %is based off the 0-D Excel Spreadsheet.  February 23,2016
-function CTGH_0D(THEEM_model,run,results_location)
+function CTGH_0D(THEEM_model,run,e)
 if strcmp(THEEM_model,'0D') %Runs for 0-D model only.
     load('THEEM_Input_0D.mat');
     T_g_avg=(T_g_in+T_g_out)/2; %Average gas outlet temp. [degC]
@@ -121,7 +121,8 @@ elseif strcmp(THEEM_model,'Optimization') %Runs for optimization code.
     save(output_name,'tubes','D_curve_outer','H_bank','Area_surf','F','deltaP_g','deltaP_l','bank_depth');
     range_output=sprintf('L%d:S%d',run+1,run+1);
     B=[tubes,D_curve_outer,H_bank,Area_surf,F,deltaP_g,deltaP_l,bank_depth];
-    xlswrite(results_location,B,range_output);
+    eActivesheetRange = e.Activesheet.get('Range',range_output);
+    eActivesheetRange.Value = B;
 elseif strcmp(THEEM_model,'Parametric Study') %Runs for Parametric Study
     save('Optimization Program/Parametric Study/THEEM_Output_temp_0D.mat');
 elseif strcmp(THEEM_model, '3D') %Runs for 3-D Model
