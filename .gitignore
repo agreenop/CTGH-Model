@@ -1,3 +1,4 @@
 *.asv
 *.mat
 /Optimization Program/Parametric Study/*.xlsx
+/Optimization Program/Optimization_Files

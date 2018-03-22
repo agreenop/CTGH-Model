@@ -81,9 +81,6 @@ if Re_l<=Re_c %Laminar flow
     elseif De_l>40
         f_l=64/Re_l*((1-0.18/(1+(35/De_l)^2)^(1/2))^0+De_l/88.33)^(1/2);
     end
-elseif strcmp(liquid,'Sodium')==1 %Turbulent and liquid metal
-   f_l=(0.790*log(Re_l)-1.64)^(-2); %Friction factor for turbulent flow for smooth straight pipe
-   Nu_l=5.0+0.025*(Re_l*Pr_l)^0.8; %Nusselt number for straight pipe with turbulent liquid metal
 elseif Re_l>Re_c %Transition Zone Flow/ Turbulent Flow
     Pr_si=Pr_l; %For 0D model, surface Prandtl number is approximately equal to bulk Prandtl number
     f_l=(0.076*Re_l^(-0.25)+0.00725*(D_in/(D_curv_avg))^0.5)*(Pr_l/Pr_si)^(-1/3); %Friction factor for turbulent flow for coiled pipe

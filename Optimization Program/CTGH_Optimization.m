@@ -17,16 +17,16 @@ T_l_out=373; %Liquid Outlet temperature [degC]
 T_g_out=516.6; %Gas outlet temperature [degC]
 gas='Supercritical CO2';
 liquid='Sodium';
-heat_rod=1/3;
+heat_rod=1/4;
 tube_material='316 Stainless Steel';
 tube_slope=0.0030;
 spacers=2;
 spacer_width=0.0380;
 disk_thick=.003;
 %% Physical Constraints
-D_bund_out_max=6; % Max diameter of vessel [meters]
-H_bund_max=12; % Max height of vessel [meters]
-bund_width_min=0.25; %Minimum width of bundle as a percentage of vessel outer diameter
+D_bund_out_max=5; % Max diameter of vessel [meters]
+H_bund_max=10; % Max height of vessel [meters]
+bund_width_min=0.10; %Minimum width of bundle as a percentage of vessel outer diameter
 sub_min_tot=20; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
 sub_max_tot=60; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.
 layer_min_tot=30;% Absolute minimum number of tube layers per sub-bundles allowed.  This may increase later, but not decrease.
@@ -110,6 +110,9 @@ while loops_max<loops_min || entry_max<entry_min %If the geometry is impossible,
     elseif R_ci>R_ci_min
         R_ci=max(0.9*R_ci,R_ci_min);
     elseif R_ci==R_ci_min && tube_index==1
+        Quit(e)
+        delete(e)
+        delete(h)
         error('Geometric constraints are not physically possible.  Please adjust the constraints and try again.')
     end
     width_limit_max=D_bund_out_max/2-t_vessel-2*R_ci-spacers*spacer_width; %Calculates new width limit
@@ -143,6 +146,9 @@ while bundles_max<bundles_min || layer_max<layer_min %If the geometry is impossi
         tube_index=tube_index-1; %Select the next smallest diameter tube
         [D_out,t,tube_index]=tube_selection(tube_index);
         else
+            Quit(e) %Close excel before throwing error
+            delete(e)
+            delete(h) %Close waitbar before throwing error
             error('Geometric constraints are not physically possible.  Please adjust the constraints and try again.');
         end
 end
