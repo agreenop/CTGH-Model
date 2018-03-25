@@ -2,3 +2,4 @@
 *.mat
 /Optimization Program/Parametric Study/*.xlsx
 /Optimization Program/Optimization_Files
+/Optimization Program/Optimization_Files/*.xlsx

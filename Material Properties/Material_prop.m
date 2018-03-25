@@ -17,6 +17,8 @@ switch liquid %Liquid properties depending on type of liquid
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Solar_Nitrate_Salt_prop(T_l_avg);
     case 'Sodium'    
         [mu_l,Cp_l,k_l,rho_l,Pr_l] = Sodium_prop(T_l_avg);
+    case 'NaBe Salt'
+        [mu_l,Cp_l,k_l,rho_l,Pr_l] = Nabe_prop(T_l_avg);
 end
 %% Gas Properties
 switch gas %Gas properties depending on type of gas

@@ -7,17 +7,17 @@ results_location=sprintf('Optimization Program/Optimization_Files/Optimization_R
 results_location_absolute=[pwd '\' results_location];
 delete(results_location); %Delete previous results
 %These inputs will not be changed by the optimization code:
-m_g=1360.5;
-m_l=1267;
-P_g_in=199.5;
-P_l_in=3;
-T_g_in=367;
-T_l_in=528;
-T_l_out=373; %Liquid Outlet temperature [degC] 
-T_g_out=516.6; %Gas outlet temperature [degC]
+m_g=1765;
+m_l=1559;
+P_g_in=230;
+P_l_in=20;
+T_g_in=396;
+T_l_in=650;
+T_l_out=540; %Liquid Outlet temperature [degC] 
+T_g_out=600; %Gas outlet temperature [degC]
 gas='Supercritical CO2';
-liquid='Sodium';
-heat_rod=1/4;
+liquid='NaBe Salt';
+heat_rod=1/2;
 tube_material='316 Stainless Steel';
 tube_slope=0.0030;
 spacers=2;
@@ -25,10 +25,10 @@ spacer_width=0.0380;
 disk_thick=.003;
 %% Physical Constraints
 D_bund_out_max=5; % Max diameter of vessel [meters]
-H_bund_max=10; % Max height of vessel [meters]
-bund_width_min=0.10; %Minimum width of bundle as a percentage of vessel outer diameter
+H_bund_max=12; % Max height of vessel [meters]
+bund_width_min=0.20; %Minimum width of bundle as a percentage of vessel outer diameter
 sub_min_tot=20; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
-sub_max_tot=60; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.
+sub_max_tot=100; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.
 layer_min_tot=30;% Absolute minimum number of tube layers per sub-bundles allowed.  This may increase later, but not decrease.
 layer_max_tot=100;% Absolute maximum number of tube layers per sub-bundles allowed.  This may decrease later, but not increase.
 entry_min_tot=2; % Absolute minimum number of manifolds allowed.  This may increase later, but not decrease.
@@ -62,9 +62,12 @@ for run=1:run_total
     load('Optimization Program/Optimization_Input_Temp.mat');
     h=waitbar((run-1)/run_total,h,sprintf('Progress = %2.2f%%',(run-1)/run_total*100));
 %Tube Selection
-if P_g_in<125 %Based on ASME BPVC Division 1
+if (P_g_in-P_l_in)<125 %Based on ASME BPVC Division 1
+    tube_index=1;
     D_out_in=1/4;
     t_in=0.035;
+    D_out=D_out_in*0.0254;
+    t=t_in*0.0254;
 else %Based on S-CO2 calculations
     tube_index=randi([1,5]); %Randomly select one of the 5 tubes
     [D_out,t,tube_index]=tube_selection(tube_index);
