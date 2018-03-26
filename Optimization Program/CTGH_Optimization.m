@@ -7,29 +7,29 @@ results_location=sprintf('Optimization Program/Optimization_Files/Optimization_R
 results_location_absolute=[pwd '\' results_location];
 delete(results_location); %Delete previous results
 %These inputs will not be changed by the optimization code:
-m_g=1765;
-m_l=1559;
-P_g_in=230;
-P_l_in=20;
-T_g_in=396;
-T_l_in=650;
-T_l_out=540; %Liquid Outlet temperature [degC] 
-T_g_out=600; %Gas outlet temperature [degC]
-gas='Supercritical CO2';
-liquid='NaBe Salt';
+m_l=260;
+m_g=51.0;
+P_g_in=1.01325;
+P_l_in=3.5;
+T_g_in=40;
+T_l_in=630;
+T_l_out=610; %Liquid Outlet temperature [degC] 
+T_g_out=234; %Gas outlet temperature [degC]
+gas='Air';
+liquid='FLiNaK Salt';
 heat_rod=1/2;
 tube_material='316 Stainless Steel';
 tube_slope=0.0030;
-spacers=2;
+spacers=1;
 spacer_width=0.0380;
 disk_thick=.003;
 %% Physical Constraints
-D_bund_out_max=5; % Max diameter of vessel [meters]
-H_bund_max=12; % Max height of vessel [meters]
-bund_width_min=0.20; %Minimum width of bundle as a percentage of vessel outer diameter
-sub_min_tot=20; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
+D_bund_out_max=3.0; % Max diameter of vessel [meters]
+H_bund_max=4.0; % Max height of vessel [meters]
+bund_width_min=0.1; %Minimum width of bundle as a percentage of vessel outer diameter
+sub_min_tot=2; % Absolute minimum number of sub-bundles allowed.  This may increase later, but not decrease.
 sub_max_tot=100; % Absolute maximum number of sub-bundles allowed.  This may decrease later, but not increase.
-layer_min_tot=30;% Absolute minimum number of tube layers per sub-bundles allowed.  This may increase later, but not decrease.
+layer_min_tot=10;% Absolute minimum number of tube layers per sub-bundles allowed.  This may increase later, but not decrease.
 layer_max_tot=100;% Absolute maximum number of tube layers per sub-bundles allowed.  This may decrease later, but not increase.
 entry_min_tot=2; % Absolute minimum number of manifolds allowed.  This may increase later, but not decrease.
 entry_max_tot=7; % Absolute maximum number of manifolds allowed.  This may decrease later, but not increase.
@@ -64,7 +64,7 @@ for run=1:run_total
 %Tube Selection
 if (P_g_in-P_l_in)<125 %Based on ASME BPVC Division 1
     tube_index=1;
-    D_out_in=1/4;
+    D_out_in=3/8;
     t_in=0.035;
     D_out=D_out_in*0.0254;
     t=t_in*0.0254;
@@ -78,9 +78,9 @@ end
 SL=1.256; % SL & ST hav little effect on pressure drops and effectiveness, so just assigned.  Can be reduced if bundle too large
 ST=SL/cosd(30); %In order to have the SD=ST, SL=ST*cosd(30). Forms equilateral triangle.
 % Tubes per layer
-tube_layer=randi([3,7]); %Has little effect, so just chosen randomly between 3-6. Can be reduced if bundle too large
+tube_layer=randi([2,5]); %Has little effect, so just chosen randomly between 3-6. Can be reduced if bundle too large
 % Choose inner radius of tube bundle
-R_ci_min=0.25; %Minimum inside radius of bundle is 0.25 m 
+R_ci_min=0.150; %Minimum inside radius of bundle is 0.25 m 
 R_ci_max=0.5*(sqrt(-(D_bund_out_max/2)^2*bund_width_min^2+2*(D_bund_out_max/2)^2-4*(D_bund_out_max/2)*t_vessel+2*t_vessel^2)-(D_bund_out_max/2)*bund_width_min);% Maximum inside radius of bundle so that bundle makes up the minimum percentage of the vessel
 R_ci=R_ci_min+(R_ci_max-R_ci_min)*rand(1,1); %Randomly chooses an inner radius between min and max values
 %% Choose higher priority parameters within constraints
@@ -113,6 +113,7 @@ while loops_max<loops_min || entry_max<entry_min %If the geometry is impossible,
     elseif R_ci>R_ci_min
         R_ci=max(0.9*R_ci,R_ci_min);
     elseif R_ci==R_ci_min && tube_index==1
+        eWorkbook.Save;
         Quit(e)
         delete(e)
         delete(h)
@@ -149,6 +150,7 @@ while bundles_max<bundles_min || layer_max<layer_min %If the geometry is impossi
         tube_index=tube_index-1; %Select the next smallest diameter tube
         [D_out,t,tube_index]=tube_selection(tube_index);
         else
+            eWorkbook.Save;
             Quit(e) %Close excel before throwing error
             delete(e)
             delete(h) %Close waitbar before throwing error
