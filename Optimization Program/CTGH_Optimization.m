@@ -69,7 +69,7 @@ if (P_g_in-P_l_in)<125 %Based on ASME BPVC Division 1
     D_out=D_out_in*0.0254;
     t=t_in*0.0254;
 else %Based on S-CO2 calculations
-    tube_index=randi([1,5]); %Randomly select one of the 5 tubes
+    tube_index=randi([1,6]); %Randomly select one of the 5 tubes
     [D_out,t,tube_index]=tube_selection(tube_index);
     D_out_in=D_out/0.0254;
     t_in=t/0.0254;

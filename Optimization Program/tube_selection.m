@@ -12,9 +12,12 @@ function [D_out,t,tube_index]=tube_selection(tube_index)
         case 4
             D_out_in=3/8;
             t_in=0.083;
-        otherwise %This makes sure that a number higher than expected was selected
-            tube_index=5;
+        case 5
             D_out_in=1/2;
+            t_in=0.12;
+        otherwise %This makes sure that a number higher than expected was selected
+            tube_index=6;
+            D_out_in=5/8;
             t_in=0.12;
     end
 D_out=D_out_in*0.0254; %Converts diameters to meters
